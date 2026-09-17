@@ -1,0 +1,6 @@
+{
+  "targets": ["dev", "rel", "ms"],
+  "kinds": ["feat", "fix", "chore"],
+  "worktreeDir": "../.ocp-worktrees",
+  "baseMap": {}
+}
