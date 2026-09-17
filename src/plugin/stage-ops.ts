@@ -1,6 +1,6 @@
 // stage 工具核心实现——读写 {wf}/plans/{topic}/.stage 与 .stage-history（A 仓 07 卷「状态文件」契约）。
 // 与入口解耦：宿主 loader 约束下入口仅导出插件函数（D1），本模块由插件入口与测试直引，不经入口 re-export。
-import { appendFile, readFile, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { getLegalSuccessors, isLegalTransition } from "../core/table";
 import { isValidTopic, resolveStagePaths } from "../core/paths";
 
@@ -59,7 +59,7 @@ export interface StageHistoryRecord {
   actor: StageActor;
 }
 
-/** 读 .stage：无文件视为未建档，报 STAGE_NOT_FOUND（get 是查询语义，不静默返回 null） */
+/** 读 .stage：无文件视为未建档，报 STAGE_NOT_FOUND（get 是查询语义，不静默返回 null，也不创建任何目录） */
 export async function getStage(directory: string, wfRoot: string, topic: string): Promise<StageInfo> {
   assertTopic(topic);
   const { stagePath } = await resolveStagePaths(directory, wfRoot, topic);
@@ -94,7 +94,8 @@ export async function setStage(
   actor: StageActor,
 ): Promise<StageHistoryRecord> {
   assertTopic(topic);
-  const { stagePath, historyPath } = await resolveStagePaths(directory, wfRoot, topic);
+  // 校验阶段 ensure=false：查询与非法路径不创建 plansDir（零写入严格口径，目录副作用与文件副作用一并归零）
+  const { stagePath, historyPath, plansDir } = await resolveStagePaths(directory, wfRoot, topic);
   let from: string | null = null;
   try {
     from = (await readFile(stagePath, "utf8")).trim() || null;
@@ -111,6 +112,8 @@ export async function setStage(
       getLegalSuccessors(from),
     );
   }
+  // 校验全过，进入写入区：先铺设目录再写文件
+  await mkdir(plansDir, { recursive: true });
   await writeFile(stagePath, `${to}\n`, "utf8");
   const record: StageHistoryRecord = { ts: localIsoTimestamp(new Date()), topic, from, to, actor };
   await appendFile(historyPath, `${JSON.stringify(record)}\n`, "utf8");

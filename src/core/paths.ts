@@ -11,7 +11,7 @@ export function isValidTopic(topic: string): boolean {
 }
 
 export interface StagePaths {
-  /** {wf}/plans/{topic}（已确保存在） */
+  /** {wf}/plans/{topic}（ensure=true 时已确保存在） */
   plansDir: string;
   /** {wf}/plans/{topic}/.stage */
   stagePath: string;
@@ -20,7 +20,8 @@ export interface StagePaths {
 }
 
 /**
- * 解析 topic 的三路径并铺设 plansDir（幂等，recursive）。
+ * 解析 topic 的三路径；ensure=true 时铺设 plansDir（幂等，recursive）。
+ * 查询与校验失败路径须用 ensure=false——不产生任何目录副作用（零写入的严格口径）。
  * @param directory 工作目录（宿主 ToolContext.directory 或进程 cwd）
  * @param wfRoot 工作流根：相对路径基于 directory 解析为绝对路径；绝对路径原样使用
  */
@@ -28,12 +29,15 @@ export async function resolveStagePaths(
   directory: string,
   wfRoot: string,
   topic: string,
+  ensure = false,
 ): Promise<StagePaths> {
   if (!isValidTopic(topic)) {
     throw new Error(`topic 非法（须 kebab-case：小写字母/数字/连字符，如 my-topic）：${topic}`);
   }
   const wfRootAbs = isAbsolute(wfRoot) ? wfRoot : resolve(directory, wfRoot);
   const plansDir = join(wfRootAbs, "plans", topic);
-  await mkdir(plansDir, { recursive: true });
+  if (ensure) {
+    await mkdir(plansDir, { recursive: true });
+  }
   return { plansDir, stagePath: join(plansDir, ".stage"), historyPath: join(plansDir, ".stage-history") };
 }

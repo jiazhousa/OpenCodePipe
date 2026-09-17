@@ -98,7 +98,13 @@ try {
     result.exitCode = String(code);
     result.durationMs = Date.now() - start;
     result.status = code === 0 && !timedOut && !interrupted ? "PASS" : "FAIL";
-    result.reason = timedOut ? "超时被终止" : interrupted ? "收到中止信号" : result.status === "PASS" ? "已执行" : "子进程非零退出";
+    if (timedOut) {
+      result.reason = "超时被终止";
+    } else if (interrupted) {
+      result.reason = "收到中止信号";
+    } else {
+      result.reason = result.status === "PASS" ? "已执行" : "子进程非零退出";
+    }
     failed ||= result.status === "FAIL";
     await writeFile(
       join(directory, `${step.name}.log`),
@@ -126,7 +132,7 @@ try {
     }
     await summary(failed ? "FAIL" : "PASS");
   }
-  console.log(`${failed ? "FAIL" : "PASS"} fence；汇总：${directory ? join(reports, "summary.txt") : "无法创建报告目录"}`);
+  console.log(`${failed ? "FAIL" : "PASS"} fence；汇总：${directory ? join(directory, "summary.txt") : "无法创建报告目录"}`);
   process.off("SIGINT", interrupt);
   process.off("SIGTERM", interrupt);
   process.exitCode = failed ? 1 : 0;

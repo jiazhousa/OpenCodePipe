@@ -4,6 +4,9 @@
   "workspaces": {
     "": {
       "name": "opencodepipe",
+      "dependencies": {
+        "zod": "4.1.*",
+      },
       "devDependencies": {
         "@opencode-ai/plugin": "1.18.*",
         "@types/bun": "1.3.*",
