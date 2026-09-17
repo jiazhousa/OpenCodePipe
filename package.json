@@ -1,0 +1,22 @@
+{
+  "name": "opencodepipe",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    "./plugin": "./src/plugin/index.ts"
+  },
+  "bin": {
+    "ocp": "./cli/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "fence": "bun scripts/run-test-fence.ts"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "1.18.*",
+    "@types/bun": "1.3.*",
+    "bun": "1.3.*",
+    "typescript": "5.8.*"
+  }
+}

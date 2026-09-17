@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "source": "ec746eac11c8a1a65d0c1b50a0257a60be4a4d29",
+  "states": [
+    { "name": "EPIC_SPEC_DRAFT", "path": "epic", "initial": true },
+    { "name": "EPIC_SPEC_REVIEWING", "path": "epic" },
+    { "name": "EPIC_SPEC_USER_AUDIT", "path": "epic", "blocking": true },
+    { "name": "EPIC_SPEC_APPROVED", "path": "epic" },
+    { "name": "ALL_DONE", "path": "epic", "terminal": true },
+    { "name": "SPEC_DRAFT", "path": "story", "initial": true },
+    { "name": "SPEC_REVIEWING", "path": "story" },
+    { "name": "SPEC_USER_AUDIT", "path": "story", "blocking": true },
+    { "name": "SPEC_APPROVED", "path": "story" },
+    { "name": "IMPL_DRAFT", "path": "story" },
+    { "name": "IMPL_REVIEWING", "path": "story" },
+    { "name": "IMPL_APPROVED", "path": "story" },
+    { "name": "WORKING", "path": "story", "shared": true },
+    { "name": "QUALITY_GATE", "path": "story", "shared": true },
+    { "name": "DONE", "path": "story", "terminal": true, "shared": true },
+    { "name": "ISSUE_IMPL_DRAFT", "path": "issue", "initial": true },
+    { "name": "ISSUE_IMPL_REVIEWING", "path": "issue" },
+    { "name": "ISSUE_IMPL_APPROVED", "path": "issue" }
+  ],
+  "transitions": [
+    { "from": "EPIC_SPEC_DRAFT", "to": "EPIC_SPEC_REVIEWING", "actor": "调度者", "trigger": "流程推进" },
+    { "from": "EPIC_SPEC_REVIEWING", "to": "EPIC_SPEC_USER_AUDIT", "actor": "审查者", "trigger": "Epic Spec审查PASS" },
+    { "from": "EPIC_SPEC_REVIEWING", "to": "EPIC_SPEC_DRAFT", "actor": "审查者", "trigger": "Epic Spec审查REJECT" },
+    { "from": "EPIC_SPEC_REVIEWING", "to": "EPIC_SPEC_DRAFT", "actor": "审查者", "trigger": "REJECT:SPEC_OVERTURN" },
+    { "from": "EPIC_SPEC_USER_AUDIT", "to": "EPIC_SPEC_APPROVED", "actor": "调度者", "trigger": "用户放行" },
+    { "from": "EPIC_SPEC_APPROVED", "to": "ALL_DONE", "actor": "调度者", "trigger": "全部Story DONE" },
+    { "from": "SPEC_DRAFT", "to": "SPEC_REVIEWING", "actor": "调度者", "trigger": "流程推进" },
+    { "from": "SPEC_REVIEWING", "to": "SPEC_USER_AUDIT", "actor": "审查者", "trigger": "Spec审查PASS" },
+    { "from": "SPEC_REVIEWING", "to": "SPEC_DRAFT", "actor": "审查者", "trigger": "Spec审查REJECT" },
+    { "from": "SPEC_REVIEWING", "to": "SPEC_DRAFT", "actor": "审查者", "trigger": "REJECT:SPEC_OVERTURN" },
+    { "from": "SPEC_USER_AUDIT", "to": "SPEC_APPROVED", "actor": "调度者", "trigger": "用户放行" },
+    { "from": "SPEC_APPROVED", "to": "IMPL_DRAFT", "actor": "调度者", "trigger": "流程推进" },
+    { "from": "IMPL_DRAFT", "to": "IMPL_REVIEWING", "actor": "调度者", "trigger": "流程推进" },
+    { "from": "IMPL_REVIEWING", "to": "IMPL_APPROVED", "actor": "审查者", "trigger": "Impl审查PASS" },
+    { "from": "IMPL_REVIEWING", "to": "IMPL_DRAFT", "actor": "审查者", "trigger": "Impl审查REJECT" },
+    { "from": "IMPL_REVIEWING", "to": "SPEC_DRAFT", "actor": "审查者", "trigger": "REJECT:SPEC_OVERTURN" },
+    { "from": "IMPL_APPROVED", "to": "WORKING", "actor": "调度者", "trigger": "流程推进" },
+    { "from": "WORKING", "to": "QUALITY_GATE", "actor": "调度者", "trigger": "流程推进" },
+    { "from": "QUALITY_GATE", "to": "DONE", "actor": "调度者", "trigger": "全面审查PASS" },
+    { "from": "QUALITY_GATE", "to": "WORKING", "actor": "审查者", "trigger": "全面审查REJECT" },
+    { "from": "ISSUE_IMPL_DRAFT", "to": "ISSUE_IMPL_REVIEWING", "actor": "调度者", "trigger": "流程推进" },
+    { "from": "ISSUE_IMPL_REVIEWING", "to": "ISSUE_IMPL_APPROVED", "actor": "审查者", "trigger": "Issue Impl审查PASS" },
+    { "from": "ISSUE_IMPL_REVIEWING", "to": "ISSUE_IMPL_DRAFT", "actor": "审查者", "trigger": "Issue Impl审查REJECT" },
+    { "from": "ISSUE_IMPL_REVIEWING", "to": "ISSUE_IMPL_DRAFT", "actor": "审查者", "trigger": "REJECT:SPEC_OVERTURN" },
+    { "from": "ISSUE_IMPL_APPROVED", "to": "WORKING", "actor": "调度者", "trigger": "流程推进" },
+    { "from": null, "to": "EPIC_SPEC_DRAFT", "actor": "调度者", "trigger": "建档" },
+    { "from": null, "to": "SPEC_DRAFT", "actor": "调度者", "trigger": "建档" },
+    { "from": null, "to": "ISSUE_IMPL_DRAFT", "actor": "调度者", "trigger": "建档" }
+  ],
+  "history": {
+    "file": ".stage-history",
+    "format": "JSONL",
+    "example": { "ts": "2026-09-16T21:00:00+08:00", "topic": "bd-score-panel", "from": "SPEC_REVIEWING", "to": "SPEC_USER_AUDIT", "actor": "审查者" },
+    "fields": {
+      "ts": "时间戳，ISO8601 本地时区偏移格式",
+      "topic": "主题名（kebab-case）",
+      "from": "变更前状态名；建档行为 null",
+      "to": "变更后状态名",
+      "actor": "操作角色，取值 调度者 / 审查者"
+    }
+  },
+  "notes": {
+    "source": "转移表唯一事实源为 A 仓（SpecPipe）07-state-machine.md + 03/04/05 路径卷；source 字段记推导时的 A 仓 commit hash，逐条对照清单见 .specpipe/plans/specpipe-v2-s2-core/equivalence-check.md",
+    "actor指派": "流程推进/建档/用户放行后落定/终检汇合 → 调度者；审查 PASS/REJECT/OVERTURN → 审查者。显式裁决：QUALITY_GATE→DONE 的 actor=调度者（07 卷分工段「终检双 PASS 后 DONE」归调度者，审查者 PASS 是前置之一）",
+    "共享态": "WORKING/QUALITY_GATE/DONE 为 Story 与 Issue 链共享（07 卷两链同名同义）：单条声明 + shared 标记；Issue 链引用同名态，转移边不重复声明（共享尾 3 边已含于 Story 14 边中）",
+    "不进表的三类语义": {
+      "阻塞语义": "以 state.blocking 属性表达（SPEC_USER_AUDIT / EPIC_SPEC_USER_AUDIT 须用户放行），非转移边",
+      "S2重分级与中断恢复": "调度者行为规则（07 卷「状态规则」「中断恢复」段），非转移边",
+      "Issue升级清理": "Issue 升级为 Story 时删除 .stage 文件（05 卷「升级机制」），非转移边"
+    },
+    "trigger取值集": "建档 / 流程推进 / {审查类型}审查PASS / {审查类型}审查REJECT / REJECT:SPEC_OVERTURN / 用户放行 / 全部Story DONE；{审查类型} ∈ {Epic Spec, Spec, Impl, Issue Impl, 全面审查}"
+  }
+}

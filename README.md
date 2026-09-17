@@ -25,7 +25,8 @@
 
 | 目录 | 规划内容 | 交付归属 |
 |---|---|---|
-| `plugin/` | 状态机插件：`stage_get` / `stage_set`（转移合法性校验 + `.stage-history` 留痕，转移表以数据文件加载 A 仓 `07-state-machine.md` 契约） | Story 2 |
+| `src/` | 单包工程代码：`core/`（转移表数据文件加载 + `{wf}` 路径解析）+ `plugin/`（插件入口，`plugin/` 规划目录的实现落位） | Story 2 |
+| `plugin/` | 状态机插件：`stage_get` / `stage_set`（转移合法性校验 + `.stage-history` 留痕，转移表以数据文件加载 A 仓 `07-state-machine.md` 契约）；**实现入口位于 `src/plugin/`，本目录为规划占位说明** | Story 2 |
 | `agents/` | 五角色代理定义迁移（调度者/调研者/审查者/执行者/视觉解析者）+ 权限白名单，文件头声明对口 A 仓 `08-roles.md` | Story 2 |
 | `cli/` | `ocp init`（铺设工作流目录与模板）/ `ocp doctor`（环境自检）/ `ocp worktree` + pre-push hook（质量门前置强制） | Story 3 |
 | `check-tools/` | 机械检查项：禁词扫描 / 行数预算 / commit 格式 / 转移表一致性 / 平台词扫描；预留 Task.yaml 图论校验模块位 | Story 3 |
