@@ -1,0 +1,15 @@
+{
+  "codePatterns": [
+    "src/**",
+    "tests/**",
+    "scripts/**",
+    "cli/**",
+    "check-tools/**",
+    "agents/**",
+    "configs/**",
+    "package.json",
+    "tsconfig.json",
+    "bun.lock"
+  ],
+  "archivePrefix": ".specpipe/"
+}
