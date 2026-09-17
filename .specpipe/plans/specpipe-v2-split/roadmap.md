@@ -25,7 +25,7 @@
 
 | # | 部件 | 交付物 | 验收要点 |
 |---|---|---|---|
-| 2a | TS 工程骨架 | bun + TS 工程、测试框架、fence 脚本、CI；预留 cli / check-tools 的 bin 槽位与目录 | fence 全绿；槽位消除与 S3 的骨架文件冲突；版本策略落地（`@opencode-ai/plugin` `1.18.*` + lockfile 入库 + 插件加载冒烟进 fence）；monorepo vs 单包为 spec 阶段决策项 |
+| 2a | TS 工程骨架 | bun + TS 工程、测试框架、fence 脚本；预留 cli / check-tools 的 bin 槽位与目录 | fence 全绿；槽位消除与 S3 的骨架文件冲突；版本策略落地（`@opencode-ai/plugin` `1.18.*` + lockfile 入库 + 插件加载冒烟进 fence）；monorepo vs 单包为 spec 阶段决策项（已裁决：单包）；CI 暂不建（用户裁决 2026-09-17，待 S3/发布前补） |
 | 2b | 转移表数据文件 | `configs/` 下 A 仓 07-state-machine 契约的机读形态（状态清单 + 合法转移表 + JSONL 字段定义） | 与 07 卷逐条一致；plugin 与 check-tools（S3e）共同消费同一数据文件，禁止硬编码 |
 | 2c | stage 插件 | `stage_get` / `stage_set`（转移合法性校验 + `.stage-history` 留痕） | 单测：转移表全路径覆盖 / 非法转移拒绝 / history JSONL 格式 |
 | 2d | agents 五角色 | 五角色定义迁移（自 v1）+ 权限白名单（checker edit 路径白名单、explorer 只读白名单）+ agent 配置模板 | 文件头声明对口 A 仓 08 卷章节；模型/variant 留用户决策位；白名单生效单测 |

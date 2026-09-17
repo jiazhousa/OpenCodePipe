@@ -68,7 +68,7 @@ v2 拆分为两个独立仓库：
 
 ### Story 2: B 仓核心（骨架 + 插件 + agent 定义）
 - 优先级 P0 / 依赖 Story 1（07-state-machine 契约）/ 预估 4-5 天
-- 范围：repo 骨架（TS 工程 / 测试 / fence / CI，**预留 cli 与 check-tools 的 bin 槽位、目录与 CI job，消除与 Story 3 的骨架文件冲突**）、plugin（`stage_get` / `stage_set`：转移合法性校验 + `.stage-history` 留痕，转移表以数据文件加载）、agents/（五角色定义迁移 + 权限白名单：Checker edit 路径白名单、Explorer bash 只读白名单）、单测（转移表全路径覆盖 / 非法转移拒绝 / history 格式 / 权限生效）
+- 范围：repo 骨架（TS 工程 / 测试 / fence，**CI 暂缓——用户裁决 2026-09-17，待 S3 或 npm 发布前补建**，**预留 cli 与 check-tools 的 bin 槽位、目录，消除与 Story 3 的骨架文件冲突**）、plugin（`stage_get` / `stage_set`：转移合法性校验 + `.stage-history` 留痕，转移表以数据文件加载）、agents/（五角色定义迁移 + 权限白名单：Checker edit 路径白名单、Explorer bash 只读白名单）、单测（转移表全路径覆盖 / 非法转移拒绝 / history 格式 / 权限生效）
 - S0 前置调研：opencode plugin/tool 注册 API 现状与版本锁定
 
 ### Story 3: B 仓 CLI 工具族（git 管控强制化）
