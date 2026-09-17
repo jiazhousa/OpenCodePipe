@@ -14,10 +14,48 @@
 | Story | 内容 | 状态 | 里程碑 |
 |---|---|---|---|
 | S1 | A 仓规章 v1 | ✅ DONE | M1 规章冻结 |
-| S2 | B 仓核心：TS 骨架（预留 cli/check-tools 槽位）+ stage 插件（07 契约数据文件加载）+ agents 迁移 + 权限白名单 | ⏳ 待启动 | M2 |
-| S3 | B 仓 CLI：ocp init/doctor/worktree + pre-push 强制 + check-tools（预留 Task.yaml 校验位） | ⏳ 依赖 S2 骨架 | **M2 强制层就绪** |
-| S4 | 组合验收：user-rule 抽取 + CRM demo Issue 级实跑 + 旧 skill 退役 | ⏳ 依赖 S2+S3 | **M3 切换完成 → ALL_DONE** |
+| S2 | B 仓核心（4 部件：骨架 / 转移表数据 / stage 插件 / agents） | ⏳ 待启动 | M2 |
+| S3 | B 仓 CLI（5 部件：init / doctor / worktree / pre-push / check-tools） | ⏳ 依赖 S2 骨架 | **M2 强制层就绪** |
+| S4 | 组合验收（4 部件：user-rule / 实跑 / 退役 / Epic 终检） | ⏳ 依赖 S2+S3 | **M3 切换完成 → ALL_DONE** |
 | S5 | 四层试点（候选，待立项确认）：变更式 spec + FR 锚点 + Task.yaml 手写 + 校验脚本 + A 仓 v1.1（修订 02/03/06/07 卷） | 🆕 建议 | M4 v3 起点 |
+
+### 部件级拆分（验收单元）
+
+**Story 2 —— B 仓核心**
+
+| # | 部件 | 交付物 | 验收要点 |
+|---|---|---|---|
+| 2a | TS 工程骨架 | bun + TS 工程、测试框架、fence 脚本、CI；预留 cli / check-tools 的 bin 槽位与目录 | fence 全绿；槽位消除与 S3 的骨架文件冲突；版本策略落地（`@opencode-ai/plugin` `1.18.*` + lockfile 入库 + 插件加载冒烟进 fence）；monorepo vs 单包为 spec 阶段决策项 |
+| 2b | 转移表数据文件 | `configs/` 下 A 仓 07-state-machine 契约的机读形态（状态清单 + 合法转移表 + JSONL 字段定义） | 与 07 卷逐条一致；plugin 与 check-tools（S3e）共同消费同一数据文件，禁止硬编码 |
+| 2c | stage 插件 | `stage_get` / `stage_set`（转移合法性校验 + `.stage-history` 留痕） | 单测：转移表全路径覆盖 / 非法转移拒绝 / history JSONL 格式 |
+| 2d | agents 五角色 | 五角色定义迁移（自 v1）+ 权限白名单（checker edit 路径白名单、explorer 只读白名单）+ agent 配置模板 | 文件头声明对口 A 仓 08 卷章节；模型/variant 留用户决策位；白名单生效单测 |
+
+**Story 3 —— CLI 工具族**
+
+| # | 部件 | 交付物 | 验收要点 |
+|---|---|---|---|
+| 3a | ocp init | 铺设 `{wf}/` 目录 + vendored 模板（源自 A 仓 tag 拉取）+ pre-push hook 安装 | hook 显式 opt-in（不全局注入）；vendored 同步含转移表一致性校验 |
+| 3b | ocp doctor | 环境自检 | 检索三通道**可用性发现与报告**（不内置脚本）；git/opencode 版本、agents/plugin 安装状态 |
+| 3c | ocp worktree | worktree 创建封装 + 分支命名校验 | 三级格式（目标/性质/名称）校验 |
+| 3d | pre-push hook | 校验 `.stage=DONE` 且 `.stage-history` 含质量门 PASS 记录 | **真实拦截一次未过质量门的 push（留证据）** |
+| 3e | check-tools | 禁词扫描 / 行数预算 / commit 格式 / 转移表一致性（A 仓 07 vs configs 数据文件 diff）/ A 仓平台词扫描 | 平台无关性检查从一次性人工转自动化持续保障；预留 Task.yaml 七项图论校验模块位（S5） |
+
+**Story 4 —— 组合验收 + 退役切换**
+
+| # | 部件 | 交付物 | 验收要点 |
+|---|---|---|---|
+| 4a | user-rule 成文 | 个人规则按 10-composition 组合接入 | 个人偏好项与仓默认分离清晰（"换人依然成立"测试） |
+| 4b | 集成实跑 | 实跑载体（**待用户确认**，候选 CRM demo Issue 级）+ 全程留痕归档 | pre-push 拦截与放行各验证一次 |
+| 4c | 旧体系退役 | v1 skill 归档 + 全局 AGENTS.md 指引更新 + BOOTSTRAP.md 过渡期安装节替换为 `ocp init` | 新体系完全接管 |
+| 4d | Epic 终检 | epic-spec 验收标准 6 项逐项核验 | ALL_DONE |
+
+### A 仓状态说明
+
+**v1 内容完成，无未竟项**（10 卷 795 行 + README + templates 9 件 319 行；质量门 92/100；平台词扫描零命中；M1 冻结）。后续变更均有明确触发器，不在本 Epic 待办内：
+
+1. **S5 立项** → A 仓 v1.1 修订（02/03/06/07 卷：变更式 spec / Task.yaml / evidence 挂载）
+2. **S3e 交付** → 平台无关性检查由 check-tools 自动化持续保障（当前为一次性人工结论）
+3. **B 仓发版** → vendored 同步流程启用（拉 A 仓 tag + 转移表一致性校验后打包，2b 数据文件即其起点）
 
 **行为面冻结解除点**：Story 4 DONE 后，A 仓进入正常演进周期（v1.1+）。
 
