@@ -1,0 +1,263 @@
+{
+  "version": 1,
+  "source": "ec746eac11c8a1a65d0c1b50a0257a60be4a4d29",
+  "states": [
+    {
+      "name": "EPIC_SPEC_DRAFT",
+      "path": "epic",
+      "initial": true
+    },
+    {
+      "name": "EPIC_SPEC_REVIEWING",
+      "path": "epic"
+    },
+    {
+      "name": "EPIC_SPEC_USER_AUDIT",
+      "path": "epic",
+      "blocking": true
+    },
+    {
+      "name": "EPIC_SPEC_APPROVED",
+      "path": "epic"
+    },
+    {
+      "name": "ALL_DONE",
+      "path": "epic",
+      "terminal": true
+    },
+    {
+      "name": "SPEC_DRAFT",
+      "path": "story",
+      "initial": true
+    },
+    {
+      "name": "SPEC_REVIEWING",
+      "path": "story"
+    },
+    {
+      "name": "SPEC_USER_AUDIT",
+      "path": "story",
+      "blocking": true
+    },
+    {
+      "name": "SPEC_APPROVED",
+      "path": "story"
+    },
+    {
+      "name": "IMPL_DRAFT",
+      "path": "story"
+    },
+    {
+      "name": "IMPL_REVIEWING",
+      "path": "story"
+    },
+    {
+      "name": "IMPL_APPROVED",
+      "path": "story"
+    },
+    {
+      "name": "WORKING",
+      "path": "story",
+      "shared": true
+    },
+    {
+      "name": "QUALITY_GATE",
+      "path": "story",
+      "shared": true
+    },
+    {
+      "name": "DONE",
+      "path": "story",
+      "terminal": true,
+      "shared": true
+    },
+    {
+      "name": "ISSUE_IMPL_DRAFT",
+      "path": "issue",
+      "initial": true
+    },
+    {
+      "name": "ISSUE_IMPL_REVIEWING",
+      "path": "issue"
+    },
+    {
+      "name": "ISSUE_IMPL_APPROVED",
+      "path": "issue"
+    }
+  ],
+  "transitions": [
+    {
+      "from": "EPIC_SPEC_DRAFT",
+      "to": "EPIC_SPEC_REVIEWING",
+      "trigger": "流程推进",
+      "actor": "调度者"
+    },
+    {
+      "from": "EPIC_SPEC_REVIEWING",
+      "to": "EPIC_SPEC_USER_AUDIT",
+      "trigger": "Epic Spec审查PASS",
+      "actor": "审查者"
+    },
+    {
+      "from": "EPIC_SPEC_REVIEWING",
+      "to": "EPIC_SPEC_DRAFT",
+      "trigger": "Epic Spec审查REJECT",
+      "actor": "审查者"
+    },
+    {
+      "from": "EPIC_SPEC_REVIEWING",
+      "to": "EPIC_SPEC_DRAFT",
+      "trigger": "REJECT:SPEC_OVERTURN",
+      "actor": "审查者"
+    },
+    {
+      "from": "EPIC_SPEC_USER_AUDIT",
+      "to": "EPIC_SPEC_APPROVED",
+      "trigger": "用户放行",
+      "actor": "调度者"
+    },
+    {
+      "from": "EPIC_SPEC_APPROVED",
+      "to": "ALL_DONE",
+      "trigger": "全部Story DONE",
+      "actor": "调度者"
+    },
+    {
+      "from": "SPEC_DRAFT",
+      "to": "SPEC_REVIEWING",
+      "trigger": "流程推进",
+      "actor": "调度者"
+    },
+    {
+      "from": "SPEC_REVIEWING",
+      "to": "SPEC_USER_AUDIT",
+      "trigger": "Spec审查PASS",
+      "actor": "审查者"
+    },
+    {
+      "from": "SPEC_REVIEWING",
+      "to": "SPEC_DRAFT",
+      "trigger": "Spec审查REJECT",
+      "actor": "审查者"
+    },
+    {
+      "from": "SPEC_REVIEWING",
+      "to": "SPEC_DRAFT",
+      "trigger": "REJECT:SPEC_OVERTURN",
+      "actor": "审查者"
+    },
+    {
+      "from": "SPEC_USER_AUDIT",
+      "to": "SPEC_APPROVED",
+      "trigger": "用户放行",
+      "actor": "调度者"
+    },
+    {
+      "from": "SPEC_APPROVED",
+      "to": "IMPL_DRAFT",
+      "trigger": "流程推进",
+      "actor": "调度者"
+    },
+    {
+      "from": "IMPL_DRAFT",
+      "to": "IMPL_REVIEWING",
+      "trigger": "流程推进",
+      "actor": "调度者"
+    },
+    {
+      "from": "IMPL_REVIEWING",
+      "to": "IMPL_APPROVED",
+      "trigger": "Impl审查PASS",
+      "actor": "审查者"
+    },
+    {
+      "from": "IMPL_REVIEWING",
+      "to": "IMPL_DRAFT",
+      "trigger": "Impl审查REJECT",
+      "actor": "审查者"
+    },
+    {
+      "from": "IMPL_REVIEWING",
+      "to": "SPEC_DRAFT",
+      "trigger": "REJECT:SPEC_OVERTURN",
+      "actor": "审查者"
+    },
+    {
+      "from": "IMPL_APPROVED",
+      "to": "WORKING",
+      "trigger": "流程推进",
+      "actor": "调度者"
+    },
+    {
+      "from": "WORKING",
+      "to": "QUALITY_GATE",
+      "trigger": "流程推进",
+      "actor": "调度者"
+    },
+    {
+      "from": "QUALITY_GATE",
+      "to": "DONE",
+      "trigger": "全面审查PASS",
+      "actor": "调度者"
+    },
+    {
+      "from": "QUALITY_GATE",
+      "to": "WORKING",
+      "trigger": "全面审查REJECT",
+      "actor": "审查者"
+    },
+    {
+      "from": "ISSUE_IMPL_DRAFT",
+      "to": "ISSUE_IMPL_REVIEWING",
+      "trigger": "流程推进",
+      "actor": "调度者"
+    },
+    {
+      "from": "ISSUE_IMPL_REVIEWING",
+      "to": "ISSUE_IMPL_APPROVED",
+      "trigger": "Issue Impl审查PASS",
+      "actor": "审查者"
+    },
+    {
+      "from": "ISSUE_IMPL_REVIEWING",
+      "to": "ISSUE_IMPL_DRAFT",
+      "trigger": "Issue Impl审查REJECT",
+      "actor": "审查者"
+    },
+    {
+      "from": "ISSUE_IMPL_REVIEWING",
+      "to": "ISSUE_IMPL_DRAFT",
+      "trigger": "REJECT:SPEC_OVERTURN",
+      "actor": "审查者"
+    },
+    {
+      "from": "ISSUE_IMPL_APPROVED",
+      "to": "WORKING",
+      "trigger": "流程推进",
+      "actor": "调度者"
+    },
+    {
+      "from": null,
+      "to": "EPIC_SPEC_DRAFT",
+      "trigger": "建档",
+      "actor": "调度者"
+    },
+    {
+      "from": null,
+      "to": "SPEC_DRAFT",
+      "trigger": "建档",
+      "actor": "调度者"
+    },
+    {
+      "from": null,
+      "to": "ISSUE_IMPL_DRAFT",
+      "trigger": "建档",
+      "actor": "调度者"
+    }
+  ],
+  "notes": {
+    "来源": "自 tests/table.test.ts 硬编码常量 EXPECTED_STATES/EXPECTED_EDGES 机械提取（一次性脚本，不入库）；测试常量是第一道对账，本快照是第二道（ocp check transition-consistency 第③层与 vendor-sync 哈希未变路径消费）",
+    "比较键": "state=name（path/initial/blocking/terminal/shared 全等，缺省视为 false）；edge=from→to|trigger|actor（建档边 from 记 ∅，同目标双边靠 trigger 区分）",
+    "同步义务": "转移表 states/transitions 变更须同步更新 tests/table.test.ts 常量与本快照（三方一致，缺一即 fence 第四步 FAIL）"
+  }
+}

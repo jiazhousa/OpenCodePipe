@@ -73,5 +73,21 @@
       "Issue升级清理": "Issue 升级为 Story 时删除 .stage 文件（05 卷「升级机制」），非转移边"
     },
     "trigger取值集": "建档 / 流程推进 / {审查类型}审查PASS / {审查类型}审查REJECT / REJECT:SPEC_OVERTURN / 用户放行 / 全部Story DONE；{审查类型} ∈ {Epic Spec, Spec, Impl, Issue Impl, 全面审查}"
+  },
+  "vendor": {
+    "repo": "https://github.com/jiazhousa/SpecPipe",
+    "commit": "ec746eac11c8a1a65d0c1b50a0257a60be4a4d29",
+    "files": {
+      "07-state-machine.md": "a29e809d9307876f12d4bc47c84dc48c211e0bf12275ccd0fdaa91c4b6490073",
+      "templates/epic-spec-template.md": "2de553a22adcc0b6ef218219bfed530f53b15982676a5e12efc4c0fac50b2218",
+      "templates/impl-template.md": "eea2404513784d7fa2f4610ae6b4cab3a7ba61983ea79188406dd470eae95e62",
+      "templates/issue-impl-template.md": "e373dc884587f807f2740a3e00a7110bb544158d29a12b6ffe5d0b0366655e81",
+      "templates/review-epic-spec-template.md": "e22383c58b0c79df8e15c4e32fa1e7601accc56972839e08c4db63f633a2708c",
+      "templates/review-impl-template.md": "f08559664845e0aa0c4a4827aba49cadc6e5fbdf98ebccd4fe099a05eccbe584",
+      "templates/review-issue-impl-template.md": "57fcf37e9f5f537c052455146086f88248e9cbdf997db16933b61d6a71a63062",
+      "templates/review-quality-gate-template.md": "43f715f6ad88c5aaf14d732977d5e9a0b2f348a75d0847f9d8aa98a7d2cdccdd",
+      "templates/review-spec-template.md": "cb600eede6949531730c3d4f54a0f61fcc0b160bc98ce0f07eb875b9849c6140",
+      "templates/spec-template.md": "64f0763efd08b86b5d6cb613b49047bc31ce850b863f83c2e600519fad8591a6"
+    }
   }
 }

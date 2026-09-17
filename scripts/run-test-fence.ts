@@ -1,5 +1,6 @@
-// 测试围栏（fence）——三步串行：typecheck → test → smoke（smoke 引用 src/plugin/index.ts，随块2 交付；
-// 在此之前 fence 跑到 smoke 步失败属预期）。
+// 测试围栏（fence）——四步串行：typecheck → test → smoke → consistency（smoke 引用 src/plugin/index.ts，随块2 交付；
+// 第四步经 ocp CLI 执行转移表三层一致性检查，cli/commands/check.ts 收敛前该步非零退出属预期，
+// 全量四步 fence 须块A/B/C/D 全部合入后执行）。
 // 范式参照 OpenCodeQuota scripts/run-test-fence.ts 大幅简化：步骤编排 + test-fence-reports/fence-*/summary.txt + SIGINT 中止。
 import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -18,6 +19,8 @@ const steps: Step[] = [
   { name: "typecheck", command: [process.execPath, "run", "typecheck"], timeout: 300_000 },
   { name: "test", command: [process.execPath, "test"], timeout: 600_000 },
   { name: "smoke", command: [process.execPath, join(repository, "scripts/smoke-plugin.ts")], timeout: 300_000 },
+  // 第四步（D18）：转移表三层一致性（vendored 哈希 / schema / 快照对账），0=PASS / 1=FAIL
+  { name: "consistency", command: [process.execPath, "cli/index.ts", "check", "transition-consistency"], timeout: 60_000 },
 ];
 
 interface StepResult {
