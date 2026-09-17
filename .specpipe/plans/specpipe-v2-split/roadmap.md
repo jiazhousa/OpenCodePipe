@@ -21,7 +21,7 @@
 
 **行为面冻结解除点**：Story 4 DONE 后，A 仓进入正常演进周期（v1.1+）。
 
-**S2 前置**：S0 调研 opencode plugin/tool 注册 API 现状与版本锁定策略。
+**S2 前置**：S0 调研 opencode plugin/tool 注册 API 现状与版本锁定策略。✅ 2026-09-17 完成——插件/tool 注册（`Hooks.tool` + zod args）/permission.ask 钩子/Bun in-process 运行环境全部可行；**版本裁决（用户拍板）：V1 线 `1.18.*`（锁 major.minor，patch 浮动）+ lockfile 固化 + fence 插件加载冒烟兜底**，兼容性承诺"仅 V1 宿主 1.18.x"，V2（beta 硬断代）转正时显式立项迁移。
 
 ## v3 演进（design-four-layer.md 演进路径）
 
