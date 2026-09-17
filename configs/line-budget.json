@@ -1,0 +1,10 @@
+{
+  "note": "工件行数预算规则表（06 卷口径）。规则表按序匹配、首个命中生效——epic-spec-revision 必须排在 spec-revision 之前（通配重叠防误伤）。{wf} 运行时替换为工作流根（默认 .specpipe）。impl.md 与 impl/issue-impl/质量门报告不配规则（06 卷不设上限）。",
+  "rules": [
+    { "pattern": "{wf}/plans/*/spec.md", "maxLines": 300 },
+    { "pattern": "{wf}/plans/*/epic-spec.md", "maxLines": 500 },
+    { "pattern": "{wf}/plans/*/issue-impl.md", "maxLines": 80 },
+    { "pattern": "{wf}/reviews/*-epic-spec-revision-*.md", "maxLines": 40 },
+    { "pattern": "{wf}/reviews/*-spec-revision-*.md", "maxLines": 30 }
+  ]
+}

@@ -18,7 +18,7 @@
 ## 命名基线
 
 - 仓库名：`OpenCodePipe`
-- CLI 命令：`ocp`（如 `ocp init` / `ocp doctor` / `ocp stage set`）
+- CLI 命令：`ocp`（如 `ocp init` / `ocp doctor` / `ocp check`；stage 读写能力归 opencode 插件，非 CLI 命令）
 - npm 包名：`opencodepipe`
 
 ## 目录规划
@@ -28,8 +28,8 @@
 | `src/` | 单包工程代码：`core/`（转移表数据文件加载 + `{wf}` 路径解析）+ `plugin/`（插件入口，`plugin/` 规划目录的实现落位） | Story 2 |
 | `plugin/` | 状态机插件：`stage_get` / `stage_set`（转移合法性校验 + `.stage-history` 留痕，转移表以数据文件加载 A 仓 `07-state-machine.md` 契约）；**实现入口位于 `src/plugin/`，本目录为规划占位说明** | Story 2 |
 | `agents/` | 五角色代理定义迁移（调度者/调研者/审查者/执行者/视觉解析者）+ 权限白名单，文件头声明对口 A 仓 `08-roles.md` | Story 2 |
-| `cli/` | `ocp init`（铺设工作流目录与模板）/ `ocp doctor`（环境自检）/ `ocp worktree` + pre-push hook（质量门前置强制） | Story 3 |
-| `check-tools/` | 机械检查项：禁词扫描 / 行数预算 / commit 格式 / 转移表一致性 / 平台词扫描；预留 Task.yaml 图论校验模块位 | Story 3 |
+| `cli/` | `ocp` 命令族：init（铺设工作流目录与模板）/ doctor（环境自检）/ worktree（分支工作树）/ check（机械检查路由五项）/ hook（pre-push 校验入口，`.stage=DONE` 质量门前置强制） | Story 3 |
+| `check-tools/` | 机械检查项：whitespace（尾随空白 + EOF 换行）/ line-budget（工件行数预算）/ commit-format（commit 格式）/ transition-consistency（转移表三层一致性：vendored 哈希 / schema / 快照对账）/ platform-words（平台词扫描，覆盖原禁词场景）；预留 Task.yaml 图论校验模块位 | Story 3 |
 | `configs/` | 可配置数据：状态转移表数据文件、Git 分支策略默认值、用户配置项默认值与声明接口、规则库（自 v1 迁移） | Story 2/3 |
 
 > 各目录当前为规划占位，随对应 Story 交付填充——**本仓自身开发走 SpecPipe 工作流**（规格先行，档案见工作流目录）。

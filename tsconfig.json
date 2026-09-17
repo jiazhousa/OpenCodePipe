@@ -12,6 +12,6 @@
     "resolveJsonModule": true,
     "verbatimModuleSyntax": true
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "scripts/**/*.ts", "cli/**/*.ts"],
+  "include": ["src/**/*.ts", "tests/**/*.ts", "scripts/**/*.ts", "cli/**/*.ts", "check-tools/**/*.ts"],
   "exclude": ["node_modules", "test-fence-reports"]
 }

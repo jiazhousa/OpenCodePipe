@@ -1,0 +1,4 @@
+{
+  "note": "commit message 首行格式：<type>: <描述>；描述至少一个 CJK 字符；merge commit（Merge / Merge branch / Merge pull request 开头）跳过不检。",
+  "types": ["feat", "fix", "docs", "chore", "refactor", "test", "style"]
+}
