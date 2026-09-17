@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "ec746eac11c8a1a65d0c1b50a0257a60be4a4d29",
+  "source": "1ecfe8dd9b21004b51b93b58dea7b71d40485ce9",
   "states": [
     { "name": "EPIC_SPEC_DRAFT", "path": "epic", "initial": true },
     { "name": "EPIC_SPEC_REVIEWING", "path": "epic" },
@@ -76,7 +76,7 @@
   },
   "vendor": {
     "repo": "https://github.com/jiazhousa/SpecPipe",
-    "commit": "ec746eac11c8a1a65d0c1b50a0257a60be4a4d29",
+    "commit": "1ecfe8dd9b21004b51b93b58dea7b71d40485ce9",
     "files": {
       "07-state-machine.md": "a29e809d9307876f12d4bc47c84dc48c211e0bf12275ccd0fdaa91c4b6490073",
       "templates/epic-spec-template.md": "2de553a22adcc0b6ef218219bfed530f53b15982676a5e12efc4c0fac50b2218",

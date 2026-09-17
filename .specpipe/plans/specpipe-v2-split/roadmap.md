@@ -4,8 +4,8 @@
 
 ## 当前状态（2026-09-17 会话收尾）
 
-- **M1 规章冻结 ✅**：A 仓 SpecPipe v1 已合并 main（`2b21dfb → ec746ea`，含三层定位修订），12 文件 1028 行，质量门 92/100
-- **M2 强制层就绪 ✅**（2026-09-17）：S2 核心（骨架/转移表/stage 插件/agents，质量门 94/100）+ S3 CLI（init/doctor/worktree/pre-push/check-tools，质量门 98/100，fence 四步全绿）交付完毕；**B 仓自举 pre-push hook 已投入运行**；vendored 基线 `ec746eac`
+- **M1 规章冻结 ✅**：A 仓 SpecPipe v1 已合并 main（`2b21dfb → 1ecfe8d`，含三层定位修订），12 文件 1028 行，质量门 92/100
+- **M2 强制层就绪 ✅**（2026-09-17）：S2 核心（骨架/转移表/stage 插件/agents，质量门 94/100）+ S3 CLI（init/doctor/worktree/pre-push/check-tools，质量门 98/100，fence 四步全绿）交付完毕；**B 仓自举 pre-push hook 已投入运行**；vendored 基线 `1ecfe8dd9b21004b51b93b58dea7b71d40485ce9`
 - 凭证：`~/.env`（GH_TOKEN）+ `~/.git-credentials`（git 自动认证）；2026-09-17 token 已轮换，冗余条目清理为单行
 - 开发模式（2026-09-17 用户拍板）：A/B 两仓日常迭代**直接提交 main**（个人仓，免分支/PR 开销）；10-composition 的 Git 分支策略面向使用方项目，不约束本体系两仓自身
 
@@ -22,7 +22,7 @@
 |---|---|---|---|
 | S1 | A 仓规章 v1 | ✅ DONE | M1 规章冻结 |
 | S2 | B 仓核心（4 部件：骨架 / 转移表数据 / stage 插件 / agents） | ✅ DONE（2026-09-17，质量门 94/100 + fence 三步全绿；插件 file:// 挂载实证、五角色迁移保真 diff） | M2 前半 |
-| S3 | B 仓 CLI（5 部件：init / doctor / worktree / pre-push / check-tools） | ✅ DONE（2026-09-17，质量门 98/100 + fence 四步全绿；pre-push 真机四情形验证 + B 仓自举；vendored 基线 ec746eac） | **M2 强制层就绪 ✅** |
+| S3 | B 仓 CLI（5 部件：init / doctor / worktree / pre-push / check-tools） | ✅ DONE（2026-09-17，质量门 98/100 + fence 四步全绿；pre-push 真机四情形验证 + B 仓自举；vendored 基线 1ecfe8dd9b21004b51b93b58dea7b71d40485ce9） | **M2 强制层就绪 ✅** |
 | S4 | 组合验收（4 部件：user-rule / 实跑 / 退役 / Epic 终检） | ⏳ 依赖 S2+S3 | **M3 切换完成 → ALL_DONE** |
 | S5 | 四层试点（候选，待立项确认）：变更式 spec + FR 锚点 + Task.yaml 手写 + 校验脚本 + A 仓 v1.1（修订 02/03/06/07 卷） | 🆕 建议 | M4 v3 起点 |
 
@@ -62,7 +62,7 @@
 
 1. **S5 立项** → A 仓 v1.1 修订（02/03/06/07 卷：变更式 spec / Task.yaml / evidence 挂载）——⏳ 待立项，触发器未发生
 2. ~~S3e 交付 → 平台无关性转自动化~~ ✅ **已发生**（S3 交付 platform-words，对 A 仓全仓 20 文件实测零命中，进 fence 持续保障）
-3. ~~B 仓发版 → vendored 同步启用~~ ✅ **已提前发生**（S3 交付 vendor-sync + 基线 `ec746eac` + fence 第四步一致性校验；A 仓后续变更走两段式同步：vendor-sync 机械同步 → 语义适配开 Story/Issue，见 epic 业务规则 10）
+3. ~~B 仓发版 → vendored 同步启用~~ ✅ **已提前发生**（S3 交付 vendor-sync + 基线 `1ecfe8dd9b21004b51b93b58dea7b71d40485ce9` + fence 第四步一致性校验；A 仓后续变更走两段式同步：vendor-sync 机械同步 → 语义适配开 Story/Issue，见 epic 业务规则 10）
 
 **行为面冻结解除点**：Story 4 DONE 后，A 仓进入正常演进周期（v1.1+）。
 

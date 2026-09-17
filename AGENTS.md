@@ -24,7 +24,7 @@
 
 - **四块交付**：块A CLI 骨架（五命令路由 `#!/usr/bin/env bun` + 退出码 0/1/2）/ 块B pre-push hook（hook-core 纯函数 + stdin refs 解析）/ 块C check-tools 四项 + check 路由 / 块D vendored 机制 + 三层一致性
 - **pre-push 语义（spec rev2 定稿）**：按 diff 判定——纯档案放行；代码变更 → Story/Issue topic 须 `.stage=DONE`（history 存在则逐行 JSON.parse 核 `QUALITY_GATE→DONE` 行，**双形态容错**；存在缺行=拒；文件缺失=WARN 存量豁免）；**Epic topic 跳过**（epic-spec.md 存在即判定）；无 topic 代码 WARN 放行；fail-open（解析异常放行）。**坑：git 调 pre-push 传 `<remote> <url>` 位置参数**——用法检查须容忍（真机抓出）
-- **vendored 消费者责任**：`configs/vendor/specpipe/`（07 卷 + templates 九件，基线 ec746eac）+ transition-table vendor 段（十件 sha256）+ transition-snapshot.json（与 S2 测试常量同构，比较键 edge=from→to|trigger|actor）；`vendor-sync.ts` 判据：**07 哈希变化即"契约已变"非零退出**（人工适配走 Story/Issue）；一致性三层进 fence 第四步（consistency）
+- **vendored 消费者责任**：`configs/vendor/specpipe/`（07 卷 + templates 九件，基线 1ecfe8dd9b21004b51b93b58dea7b71d40485ce9）+ transition-table vendor 段（十件 sha256）+ transition-snapshot.json（与 S2 测试常量同构，比较键 edge=from→to|trigger|actor）；`vendor-sync.ts` 判据：**07 哈希变化即"契约已变"非零退出**（人工适配走 Story/Issue）；一致性三层进 fence 第四步（consistency）
 - **check 五项**：whitespace / line-budget（**规则表按序首配生效**，epic-spec-revision 排前防通配重叠；impl 类报告不设限）/ commit-format（merge 跳过）/ transition-consistency / platform-words（词表对齐 S1 禁词分类；全仓检查 `--path` 指 A 仓，实测 20 文件零命中）
 - **doctor 二级配置**：项目级 `{wf}/doctor-config.json` → 用户级 `~/.config/opencodepipe/doctor.json`；只报告不安装
 - **B 仓自举**：`.git/hooks/pre-push` 已装（薄壳三段：ocp 优先/bun 回退/双缺警告 exit 0）；首次真实 push 于 Story 3 收尾
