@@ -15,7 +15,7 @@
 |---|---|---|---|
 | S1 | A 仓规章 v1 | ✅ DONE | M1 规章冻结 |
 | S2 | B 仓核心（4 部件：骨架 / 转移表数据 / stage 插件 / agents） | ✅ DONE（2026-09-17，质量门 94/100 + fence 三步全绿；插件 file:// 挂载实证、五角色迁移保真 diff） | M2 前半 |
-| S3 | B 仓 CLI（5 部件：init / doctor / worktree / pre-push / check-tools） | ⏳ 依赖 S2 骨架 | **M2 强制层就绪** |
+| S3 | B 仓 CLI（5 部件：init / doctor / worktree / pre-push / check-tools） | ✅ DONE（2026-09-17，质量门 98/100 + fence 四步全绿；pre-push 真机四情形验证 + B 仓自举；vendored 基线 ec746eac） | **M2 强制层就绪 ✅** |
 | S4 | 组合验收（4 部件：user-rule / 实跑 / 退役 / Epic 终检） | ⏳ 依赖 S2+S3 | **M3 切换完成 → ALL_DONE** |
 | S5 | 四层试点（候选，待立项确认）：变更式 spec + FR 锚点 + Task.yaml 手写 + 校验脚本 + A 仓 v1.1（修订 02/03/06/07 卷） | 🆕 建议 | M4 v3 起点 |
 
