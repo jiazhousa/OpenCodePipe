@@ -42,8 +42,8 @@
 7. `src/core/paths.ts`（新建）：`resolveStagePaths(directory, wfRoot, topic)` → `{ stagePath, historyPath, plansDir }`；mkdir plansDir（幂等）；含 topic kebab-case 校验（D7）
 8. `cli/index.ts`（新建）：占位 stub（D1）；`cli/README.md` 更新一行（S3 填充说明）
 9. `plugin/README.md`（**更新**）：入口实际位置指向 `src/plugin/`（保持目录规划叙事：本目录为规划占位说明，实现在 src/）；根 README 目录表同步备注
-10. `scripts/run-test-fence.ts`（新建）：D12 三步编排
-11. `scripts/smoke-plugin.ts`（新建）：D12 冒烟（含 execute 全链路）
+10. `scripts/run-test-fence.ts`（新建）：D12 三步编排（**注**：fence 全量在块2 完成后才有意义——smoke 引用块2 的插件入口；块1 验证不含 fence）
+11. `scripts/smoke-plugin.ts`（新建，**归块2**——import `src/plugin/index.ts`，块1 完成时该入口不存在，放块1 会让 typecheck 挂）：D12 冒烟（含 execute 全链路）
 12. `tests/table.test.ts`（新建，**归块1**——仅依赖数据文件与 src/core）：① **硬编码期望边集**（从 07/03/04/05 卷人工推导逐条写入测试常量），与数据文件加载结果**双向断言**（数据文件 ⊆ 期望集 = 无多边；期望集 ⊆ 数据文件 = 无缺边）——杜绝以数据文件自证；② 每条合法边（25+3）≥1 用例断言 `isLegalTransition`；③ 三路径端到端序列各 1 条（沿链逐态推进）；④ 非法转移代表性枚举：跳级（SPEC_DRAFT→IMPL_APPROVED）、逆行（WORKING→SPEC_DRAFT）、跨路径污染（EPIC_SPEC_DRAFT→SPEC_REVIEWING）、终态无后继（DONE/ALL_DONE→任意）、from=null 建档仅限 initial 三态；⑤ 去重语义（Issue REVIEWING 双边同目标，successors 只列一次）
 13. `bun.lock`（生成后入库）
 
@@ -67,7 +67,7 @@
 ## 依赖
 
 - `@opencode-ai/plugin@1.18.*` + `typescript@5.8.*` + `@types/bun@1.3.*` + `bun@1.3.*`（npm，bun.lock 固化）
-- A 仓 07-state-machine.md + 03/04 路径卷（转移表唯一事实源与 OVERTURN 边出处，数据文件 `source` 记 commit）
+- A 仓 07-state-machine.md + 03/04/05 路径卷（转移表唯一事实源与 OVERTURN 边出处——05 为 Issue 链与非法枚举口径来源；数据文件 `source` 记 commit）
 - v1 agents 定义（本机 `~/.config/opencode/agents/*.md`，迁移源）
 - 本机 opencode 1.18.31（手验宿主；插件加载行为实证：`isPathPluginSpec` 识别 file:///./绝对路径、全运行时导出即插件）
 
