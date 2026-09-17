@@ -6,7 +6,8 @@
 
 - **M1 规章冻结 ✅**：A 仓 SpecPipe v1 已合并 main（`2b21dfb → 6e18647`），12 文件 1028 行，质量门 92/100
 - B 仓 OpenCodePipe 已 init（root commit `5ed3e28`：README + 目录骨架 + License）
-- 凭证：`~/.env`（GH_TOKEN）+ `~/.git-credentials`（git 自动认证）
+- 凭证：`~/.env`（GH_TOKEN）+ `~/.git-credentials`（git 自动认证）；2026-09-17 token 已轮换，冗余条目清理为单行
+- 开发模式（2026-09-17 用户拍板）：A/B 两仓日常迭代**直接提交 main**（个人仓，免分支/PR 开销）；10-composition 的 Git 分支策略面向使用方项目，不约束本体系两仓自身
 
 ## v2 拆分（Epic specpipe-v2-split，进行中）
 
