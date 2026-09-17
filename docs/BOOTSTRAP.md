@@ -24,15 +24,15 @@ git clone https://github.com/jiazhousa/OpenCodePipe ~/project/OpenCodePipe
 
 `.specpipe/` 内含 Epic `specpipe-v2-split` 全套档案（epic-spec / roadmap / Story 1 spec+impl+等价底稿 / 全部审查报告）——**这是工作流档案权威位置**，后续 Story 的档案直接产生于本仓目录。
 
-## 3. 外部检索三 CLI（调研角色用）
+## 3. 外部检索三通道（调研角色用，用户自备）
 
-| CLI | 安装 |
-|---|---|
-| `tvly` | `pip install tvly`（Tavily 官方；需 `TAVILY_API_KEY`） |
-| `exa` | 自建 curl 脚本（从原机器 `~/.local/bin/exa` 复制，key 内置） |
-| `c7` | 自建 curl 脚本（从原机器 `~/.local/bin/c7` 复制） |
+检索三职责位（主搜索 / 备选搜索 / 文档查询）的职责契约见 A 仓 `08-roles.md`；**具体命令由用户自备并在用户配置中声明，本仓不内置检索脚本**（`ocp doctor` 交付后仅检测已声明命令的可用性）。参考配置：
 
-> exa/c7 为独立 curl 脚本（仅依赖 curl + python3）；迁移收纳到本仓属 Story 2/3 范围。
+| 职责位 | 参考命令 | 说明 |
+|---|---|---|
+| 主搜索 | `tvly`（`pip install tvly`，需 `TAVILY_API_KEY`）或自选 | 网络搜索主通道 |
+| 备选搜索 | `exa`（自建 curl 脚本或官方 CLI）或自选 | 主通道超额时切换；兼页面正文抽取 |
+| 文档查询 | `c7` / `ctx7` 或自选 | 库/框架文档查询 |
 
 ## 4. opencode 模型配置（个人配置域，不入公开仓）
 

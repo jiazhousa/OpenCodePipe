@@ -41,13 +41,14 @@
 ## 体系全景
 
 ```
-SpecPipe（A 仓 · 规章）✅ v1 ──vendored 引用（发版同步+转移表一致性校验）──→ OpenCodePipe（B 仓 · 实现）🆕 骨架就绪
-                                                                        ├─ plugin/    stage 插件（S2）
-                                                                        ├─ agents/    五角色+权限（S2）
-                                                                        ├─ cli/       ocp 命令 + pre-push（S3）
-                                                                        ├─ check-tools/ 机械校验（S3）
-                                                                        └─ configs/   转移表数据/分支策略/规则库（S2/3）
-user-rule（个人规则）⏳ S4 抽取 ── 按 A 仓 10-composition 组合覆盖 ──→ B 仓默认配置
+Spec 哲学（思想根基：先规格后编码 / 注意力经济，学习了 Spec Kit 等先例）
+  └─ SpecPipe（A 仓 · 方法论）✅ v1 ──vendored 引用（发版同步+转移表一致性校验）──→ OpenCodePipe（B 仓 · 工具集，OpenCode 上的最后一公里）🆕 骨架就绪
+                                                                         ├─ plugin/    stage 插件（S2）
+                                                                         ├─ agents/    五角色+权限（S2）
+                                                                         ├─ cli/       ocp 命令 + pre-push（S3）
+                                                                         ├─ check-tools/ 机械校验（S3）
+                                                                         └─ configs/   转移表数据/分支策略默认值/用户配置接口/规则库（S2/3）
+user-rule（个人规则+用户环境声明：模型/检索命令等用户决策项）⏳ S4 抽取 ── 按 A 仓 10-composition 组合覆盖 ──→ B 仓默认配置
 旧体系 v1（本地 skill）🔄 运行中 ── S4 退役归档 ──→ 新体系 A+B 上线
 ```
 

@@ -2,6 +2,8 @@
 
 ## 背景
 
+**思想根基（Spec 哲学）**：先规格后编码——规格是人（意图）与机器（执行）之间的接口协议；注意力稀缺，人的裁定只投放在放行点（学习了 Spec Kit 等先例，完整叙事不入仓）。本体系是该哲学的工程化落地。
+
 SpecPipe v1 以单一 opencode skill 形态存在（SKILL.md ~700 行），将两类性质不同的内容混在同一份 prompt 文档中：
 
 - **流程判断**（分级判定、访谈节奏、放行裁决）——概率系统（LLM）所擅长，规则文本治理即可
@@ -14,7 +16,7 @@ v2 拆分为两个独立仓库：
 
 **核心定性（行为面冻结原则）**：v2 不改变工作流语义——状态机语义、工件集、角色职责与 v1 完全一致，仅执行面变化（自觉→强制）。A 仓的各规章卷（02-workflow、03~05 三路径、06-artifacts、07-state-machine 等）是对 v1 SKILL.md 的提炼重组，不是重设计。这是迁移风险低的根本论证。
 
-体系表述：**SpecPipe 体系 = SpecPipe（规章）+ OpenCodePipe（实现）**。叙事定位：SpecPipe 仓是作者基于 **SpecFirst 原则**总结的**工件规范与工作流规范**（方法论所有物，平台无关）；OpenCodePipe 是面向 OpenCode 的插件与工具包，从**硬件层面践行** SpecPipe 中的 workflow 与工件规范（平台实现物）。
+体系三层：**Spec 哲学（思想根基）→ SpecPipe（方法论：工作流定义 + 工件定义，Harness / Agent 无关）→ OpenCodePipe（工具集：SpecPipe 完整工程化实践在 OpenCode 上的体现与最后一公里）**。叙事定位：SpecPipe 仓是作者基于 Spec 哲学总结的**工件规范与工作流规范**（方法论所有物，平台无关）；OpenCodePipe 是面向 OpenCode 的插件与工具包，在平台层面践行 SpecPipe 中的 workflow 与工件规范（平台实现物）。
 
 ## 业务规则
 
@@ -26,6 +28,7 @@ v2 拆分为两个独立仓库：
 6. **组合覆盖机制**：user-rule（私有，个人偏好）按 A 仓 `10-composition.md` 的加载顺序叠加于方法论默认值之上。入仓筛选用**"换人依然成立"测试**：成立者进 A 仓（如 Builder/Checker 异家族互查），不成立者进 user-rule（如中文回复、模型家族选择 glm × deepseek）
 7. **git 管控强制化**：分支策略（develop/release/master、dev/feat/* 命名）为 B 仓配置数据；**pre-push hook 校验 `.stage=DONE` 且 `.stage-history` 含质量门 PASS 记录，否则拒绝 push**
 8. **A 仓平台无关约束**：全文不得出现 opencode 专属词汇（工具调用语法、权限配置语法）；平台专属操作细节归 B 仓 agent 定义与文档
+9. **机制与用户决策分离**：B 仓只交付机制（强制、校验、铺设、自检）；用户环境资产（检索命令、模型选型、目录名、分支名等具体值）由用户自备并以配置声明——B 仓不内置检索脚本等用户工具，doctor 仅做可用性发现与报告
 
 ## 验收标准
 
