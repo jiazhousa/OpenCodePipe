@@ -22,7 +22,7 @@
 | D8 | vendor-sync（判据钉死） | `scripts/vendor-sync.ts`：参数 `--path <本地A仓>` 或 `--tag <tag>`（tag 时 clone `vendor.repo` URL 到临时目录，**失败非零退出 + 明确提示**，临时目录用后即删）；流程：读旧 vendor 段 → 复制 07 卷 + templates → 重算哈希更新 vendor 段与 source → **判据：新 07 哈希 ≠ 旧声明 → 输出"契约已变，边集需人工适配（开 B 仓 Story/Issue 走审查）" + 非零退出**（哈希变化本身即需人工流程的信号）；**哈希未变 → 跑快照对账，失败才非零退出**。首跑（无旧声明）视同哈希变化路径处理但提示为"首次基线" |
 | D9 | check-tools 结构 | `check-tools/` 每项一个纯逻辑模块 + `cli/commands/check.ts` 薄路由（`ocp check <name>`）：`whitespace.ts` / `line-budget.ts` / `commit-format.ts` / `transition-consistency.ts` / `platform-words.ts`；`check-tools/task-yaml.ts` 占位（S5 预留）。全部可独立 import 测试 |
 | D10 | whitespace 规则 | 扫描 codePatterns 范围（单一配置源，沿用 prepush-config）的文本文件：尾随空白（行末空格/Tab）+ 文件末尾缺换行；输出文件:行号:类型 |
-| D11 | line-budget 规则（按 06 卷逐类钉死） | `configs/line-budget.json` 规则表（**不设兜底上限**）：`{wf}/plans/*/spec.md ≤300`、`{wf}/plans/*/epic-spec.md ≤500`、`{wf}/plans/*/issue-impl.md ≤80`、`{wf}/reviews/*-epic-spec-revision-*.md ≤40`、`{wf}/reviews/*-spec-revision-*.md ≤30`；**impl.md 与 impl/issue-impl/quality-gate 报告不配规则**（06 卷明确不设上限——B 仓现存 144/130 行合法 impl 报告不可误报）。取终稿口径，草案阶段不检 |
+| D11 | line-budget 规则（按 06 卷逐类钉死） | `configs/line-budget.json` 规则表（**不设兜底上限**；**规则表按序匹配、首个命中生效**——`*-epic-spec-revision-*` 规则必须排在 `*-spec-revision-*` 之前，防通配重叠误伤）：`{wf}/plans/*/spec.md ≤300`、`{wf}/plans/*/epic-spec.md ≤500`、`{wf}/plans/*/issue-impl.md ≤80`、`{wf}/reviews/*-epic-spec-revision-*.md ≤40`、`{wf}/reviews/*-spec-revision-*.md ≤30`；**impl.md 与 impl/issue-impl/quality-gate 报告不配规则**（06 卷明确不设上限——B 仓现存 144/130 行合法 impl 报告不可误报）。取终稿口径，草案阶段不检 |
 | D12 | commit-format 规则 | `ocp check commit-format [--range HEAD~3..HEAD]`（默认 HEAD 单条）：首行 `<type>: <描述>`，type ∈ {feat, fix, docs, chore, refactor, test, style}（`configs/commit-format.json` 可配置）；描述至少一个 CJK 字符；**merge commit（`Merge`/`Merge branch` 开头）跳过不检** |
 | D13 | transition-consistency（三层，① 遍历全量） | ① **遍历 `vendor.files` 全量**逐件重算 sha256 比对（07 卷与 templates 九件都查，非仅 07）；② 数据文件 schema 自校验（状态引用完整性/initial/terminal 存在/边引用状态存在）；③ 快照对账（snapshot ↔ 数据文件，按 D7 比较键双向）。输出逐项 PASS/FAIL |
 | D14 | platform-words（词表对齐 S1 禁词集） | `configs/platform-words.json`：`{ words: [...], extraWords: [...] }`——内置初始集**按 S1 impl 禁词表分类纳入**：opencode（独立词）、subagent、SKILL.md、`.opencode`、`~/.config/opencode`、`agents/`、`save_memory`、`MEMORY.md`、`permission.external_directory`、`external_directory`、npm、tmux、角色英文标识（Oracle/Explorer/Checker/Builder/Looker——A 仓角色卷为中文术语，英文残留即平台词）。词形边界匹配。默认扫 vendored 07+templates；**全仓检查以 `--path /path/to/SpecPipe` 指向 A 仓执行**（Epic 验收 6 口径，文档注明） |
@@ -68,7 +68,7 @@
 21. `configs/line-budget.json`（新建）：D11 规则表
 22. `configs/commit-format.json`（新建）
 23. `configs/platform-words.json`（新建）：S1 分类词表
-24. `tests/check-tools.test.ts`（新建）：四项正反用例（whitespace 命中/行数超限（含 144 行 impl 报告**不**误报的反向用例）/commit 格式非法与 merge 跳过/平台词命中各 ≥1）
+24. `tests/check-tools.test.ts`（新建）：四项正反用例（whitespace 命中/行数超限（含 144 行 impl 报告**不**误报与 34 行 Epic 报告走 ≤40 规则**不**误伤两个反向用例）/commit 格式非法与 merge 跳过/平台词命中各 ≥1）
 25. `cli/README.md` + `check-tools/README.md` + 根 `README.md`（更新）：命令用法、`--path` 全仓检查口径、`{wf}` 忽略降级语义与 `--no-verify` 逃生说明落点
 
 **块D —— vendored 机制 + 一致性**（可与 B/C 并行）
