@@ -2,12 +2,19 @@
 
 > 维护于 Epic specpipe-v2-split 档案；Story 状态与 epic-spec.md 同步更新。v3 部分依据 assets/design-four-layer.md（四层工作流设计）。
 
-## 当前状态（2026-09-16）
+## 当前状态（2026-09-17 会话收尾）
 
-- **M1 规章冻结 ✅**：A 仓 SpecPipe v1 已合并 main（`2b21dfb → 6e18647`），12 文件 1028 行，质量门 92/100
-- B 仓 OpenCodePipe 已 init（root commit `5ed3e28`：README + 目录骨架 + License）
+- **M1 规章冻结 ✅**：A 仓 SpecPipe v1 已合并 main（`2b21dfb → ec746ea`，含三层定位修订），12 文件 1028 行，质量门 92/100
+- **M2 强制层就绪 ✅**（2026-09-17）：S2 核心（骨架/转移表/stage 插件/agents，质量门 94/100）+ S3 CLI（init/doctor/worktree/pre-push/check-tools，质量门 98/100，fence 四步全绿）交付完毕；**B 仓自举 pre-push hook 已投入运行**；vendored 基线 `ec746eac`
 - 凭证：`~/.env`（GH_TOKEN）+ `~/.git-credentials`（git 自动认证）；2026-09-17 token 已轮换，冗余条目清理为单行
 - 开发模式（2026-09-17 用户拍板）：A/B 两仓日常迭代**直接提交 main**（个人仓，免分支/PR 开销）；10-composition 的 Git 分支策略面向使用方项目，不约束本体系两仓自身
+
+### 继续迭代入口（新会话从这里恢复）
+
+1. **会话起点**：在 B 仓根（`~/project/opencodepipe`）启动 opencode——档案纪律与 checker 跨 worktree 权限问题的根治方案
+2. **质量基线**：`bun run fence`（四步：typecheck/test/smoke/consistency）；`bun cli/index.ts --help` 看命令
+3. **下一步主线**：S4 组合验收（4a user-rule 成文 / 4b 实跑【载体暂缓待定】/ 4c 旧体系退役 / 4d Epic 终检）——启动前需用户确认 4b 载体或裁决跳过
+4. **挂起决策**：见下方「用户动作清单」
 
 ## v2 拆分（Epic specpipe-v2-split，进行中）
 
@@ -51,11 +58,11 @@
 
 ### A 仓状态说明
 
-**v1 内容完成，无未竟项**（10 卷 795 行 + README + templates 9 件 319 行；质量门 92/100；平台词扫描零命中；M1 冻结）。后续变更均有明确触发器，不在本 Epic 待办内：
+**v1 内容完成，无未竟项**（10 卷 795 行 + README + templates 9 件 319 行；质量门 92/100；M1 冻结）。三条演进触发器的现状（2026-09-17 更新）：
 
-1. **S5 立项** → A 仓 v1.1 修订（02/03/06/07 卷：变更式 spec / Task.yaml / evidence 挂载）
-2. **S3e 交付** → 平台无关性检查由 check-tools 自动化持续保障（当前为一次性人工结论）
-3. **B 仓发版** → vendored 同步流程启用（拉 A 仓 tag + 转移表一致性校验后打包，2b 数据文件即其起点）
+1. **S5 立项** → A 仓 v1.1 修订（02/03/06/07 卷：变更式 spec / Task.yaml / evidence 挂载）——⏳ 待立项，触发器未发生
+2. ~~S3e 交付 → 平台无关性转自动化~~ ✅ **已发生**（S3 交付 platform-words，对 A 仓全仓 20 文件实测零命中，进 fence 持续保障）
+3. ~~B 仓发版 → vendored 同步启用~~ ✅ **已提前发生**（S3 交付 vendor-sync + 基线 `ec746eac` + fence 第四步一致性校验；A 仓后续变更走两段式同步：vendor-sync 机械同步 → 语义适配开 Story/Issue，见 epic 业务规则 10）
 
 **行为面冻结解除点**：Story 4 DONE 后，A 仓进入正常演进周期（v1.1+）。
 
@@ -73,23 +80,34 @@
 
 - [x] push + 合并 Story 1（M1 生效）
 - [x] GitHub 创建 OpenCodePipe 仓
-- [x] 凭证落盘（~/.env）
-- [ ] Story 4 实跑方案确认（候选：CRM demo Issue 级）
+- [x] 凭证落盘（~/.env；2026-09-17 已轮换）
+- [ ] Story 4 实跑载体确认（候选：CRM demo `~/doc/learn/topic06-agent-pattern-selection` Issue 级 / `~/project/mini-crm-elastic` / 手头真实小项目）——**2026-09-17 用户暂缓，启动 S4 前需回定或裁决跳过（4b 单独补验）**
 - [ ] Story 5 立项确认（写入 epic-spec 路线图节）
-- [ ] S4 发布前定 B↔A 版本关联策略（B 仓版本号与 A 仓契约版本显式映射 + doctor 报告锁定版本）——2026-09-17 消费者责任模式风险评估产出
+- [ ] S4/npm 发布前定 B↔A 版本关联策略（B 仓版本号与 A 仓契约版本显式映射 + doctor 报告锁定版本）——2026-09-17 消费者责任模式风险评估产出
+
+## 遗留事项台账（非 Epic 部件，随时可拾起）
+
+| # | 事项 | 来源 | 现状 |
+|---|---|---|---|
+| L1 | CI 建设（typecheck+test+smoke+consistency） | S2 用户裁决暂缓 | 待 S4 或 npm 发布前 |
+| L2 | npm 发布准备：exports 键调整（`./server`/`main` 才被宿主 loader 消费）+ zod 已转直接依赖 ✅ | S2 发现项 1/2 | 待 S4 |
+| L3 | checker 跨 worktree edit 权限问题（本机会话工作区 ~/doc 时，checker 对 B 仓路径的绝对模式 allow 不生效，经 python3 通道落盘） | S2/S3 审查环境备注 | 根治=从 B 仓根启动会话；或后续修 checker 白名单相对形态 |
+| L4 | B 仓自举 hook 为手工变体（与 init 模板三处文本差异，行为等价） | S3 质量门备查 | 可择机统一为 init 生成物 |
+| L5 | doctor vendored 检查与 transition-consistency ① 层语义重叠（块A 等价自实现） | S3 块A 发现项 | 行为一致，重构复用可选 |
+| L6 | 本机会话工作流档案 .stage 手写时代无 history 留痕（pre-push 存量豁免覆盖） | S2 前历史事实 | 无需补；S4 起新 topic 走 stage_set 插件留痕 |
 
 ## 体系全景
 
 ```
 Spec 哲学（思想根基：先规格后编码 / 注意力经济，学习了 Spec Kit 等先例）
-  └─ SpecPipe（A 仓 · 方法论）✅ v1 ──vendored 引用（发版同步+转移表一致性校验）──→ OpenCodePipe（B 仓 · 工具集，OpenCode 上的最后一公里）🆕 骨架就绪
-                                                                         ├─ plugin/    stage 插件（S2）
-                                                                         ├─ agents/    五角色+权限（S2）
-                                                                         ├─ cli/       ocp 命令 + pre-push（S3）
-                                                                         ├─ check-tools/ 机械校验（S3）
-                                                                         └─ configs/   转移表数据/分支策略默认值/用户配置接口/规则库（S2/3）
+  └─ SpecPipe（A 仓 · 方法论）✅ v1 ──vendored 引用（vendor-sync 两段式同步 + fence 一致性校验）──→ OpenCodePipe（B 仓 · 工具集，OpenCode 上的最后一公里）✅ M2 强制层就绪
+                                                                          ├─ src/plugin + configs    stage 插件 + 转移表数据（S2 ✅）
+                                                                          ├─ agents/    五角色+权限白名单（S2 ✅）
+                                                                          ├─ cli/       ocp 五命令 + pre-push 自举运行中（S3 ✅）
+                                                                          ├─ check-tools/ 五项机械校验（S3 ✅）
+                                                                          └─ configs/vendor/ + snapshot   vendored 契约副本（S3 ✅）
 user-rule（个人规则+用户环境声明：模型/检索命令等用户决策项）⏳ S4 抽取 ── 按 A 仓 10-composition 组合覆盖 ──→ B 仓默认配置
-旧体系 v1（本地 skill）🔄 运行中 ── S4 退役归档 ──→ 新体系 A+B 上线
+旧体系 v1（本地 skill）🔄 运行中 ── S4 退役归档 ──→ 新体系 A+B 完全接管
 ```
 
 ## 档案权威说明（2026-09-16 追加）

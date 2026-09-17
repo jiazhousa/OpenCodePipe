@@ -2,6 +2,7 @@
 
 > 目标：在全新机器上恢复 SpecPipe 工作流开发环境，可直接迭代 OpenCodePipe（B 仓）。
 > 前置：git（凭据见 `~/.env` 与 `~/.git-credentials` 迁移）、[opencode](https://opencode.ai)、tmux。
+> **当前进度与继续迭代入口**：见 `.specpipe/plans/specpipe-v2-split/roadmap.md`「当前状态」节（M2 强制层已就绪，S2/S3 交付，下一步 S4）。
 
 ## 1. 恢复工作流引擎（v1 skill，过渡期方案）
 
