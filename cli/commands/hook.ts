@@ -186,7 +186,8 @@ export async function runHookPrePush(ctx: { cwd: string; stdin: string }): Promi
 
 /** 命令行入口：ocp hook pre-push（由 .git/hooks/pre-push 薄壳调用） */
 export async function main(args: string[], ctx: { cwd: string }): Promise<number> {
-  if (args[0] !== "pre-push" || args.length > 1) {
+  // git 调用 pre-push 约定：$1=remote 名、$2=push url——薄壳透传为额外位置参数，属合法形态，忽略之
+  if (args[0] !== "pre-push" || args.length > 3) {
     console.error("用法：ocp hook pre-push（由 pre-push 薄壳调用，stdin 传 ref 行，勿手工执行）");
     return 2;
   }
