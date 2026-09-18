@@ -256,6 +256,75 @@ export async function checkVendored(root: string, config: DoctorConfig): Promise
   return { name: "vendored", level: "PASS", message: `${Object.keys(files).length} 件一致（source commit：${vendor?.commit ?? "未知"}）${note}` };
 }
 
+/** opencode.json 整对象读取：不存在 → null（该级未配置）；解析失败/非对象 → 抛出 */
+async function readConfigObject(path: string): Promise<Record<string, unknown> | null> {
+  const json: unknown = JSON.parse(await readFile(path, "utf8"));
+  if (json === null || typeof json !== "object" || Array.isArray(json)) {
+    throw new Error("顶层不是对象");
+  }
+  return json as Record<string, unknown>;
+}
+
+/** agent md frontmatter 的 model 行提取：未声明/占位形态（含"用户决策位"）→ null */
+async function readAgentFrontmatterModel(path: string): Promise<string | null> {
+  try {
+    const text = await readFile(path, "utf8");
+    const match = text.match(/^---\n([\s\S]*?)\n---\n/);
+    if (!match) return null;
+    const modelLine = match[1].match(/^model:\s*(.+)$/m);
+    if (!modelLine) return null;
+    const value = modelLine[1].trim().replace(/^["']|["']$/g, "");
+    return value.includes("用户决策位") ? null : value;
+  } catch {
+    return null; // 文件不存在等，视为未声明
+  }
+}
+
+/** 模型路由建议检查（2026-09-18 用户策略）：非 Checker 角色用默认模型即可；checker 与 oracle/builder 同 modelId 时 WARN——跨家族交叉验证是 checker 选型的核心价值（同模型自审易同盲区） */
+export async function checkModelRouting(
+  globalConfigPath: string,
+  projectConfigPath: string,
+  agentsDirs: string[],
+): Promise<CheckResult> {
+  // 生效模型解析链（浅合并：项目级覆盖全局级）：opencode.json agent 段 → agent md frontmatter → <默认>
+  const resolve = async (name: string): Promise<string> => {
+    for (const path of [projectConfigPath, globalConfigPath]) {
+      try {
+        if (!existsSync(path)) continue;
+        const config = await readConfigObject(path);
+        const agentSection = config?.agent;
+        if (agentSection && typeof agentSection === "object" && !Array.isArray(agentSection)) {
+          const entry = (agentSection as Record<string, unknown>)[name];
+          if (entry && typeof entry === "object") {
+            const model = (entry as Record<string, unknown>).model;
+            if (typeof model === "string" && model && !model.includes("用户决策位")) return model;
+          }
+        }
+      } catch {
+        // 配置解析失败不阻断：交给下一来源
+      }
+    }
+    for (const dir of agentsDirs) {
+      const fromFile = await readAgentFrontmatterModel(join(dir, `${name}.md`));
+      if (fromFile) return fromFile;
+    }
+    return "<默认>";
+  };
+  const [oracleModel, checkerModel, builderModel] = await Promise.all([resolve("oracle"), resolve("checker"), resolve("builder")]);
+  const clashes: string[] = [];
+  if (checkerModel === oracleModel) clashes.push(`oracle=${oracleModel}`);
+  if (checkerModel === builderModel) clashes.push(`builder=${builderModel}`);
+  if (clashes.length > 0) {
+    const sameDefault = checkerModel === "<默认>";
+    return {
+      name: "agent-model",
+      level: "WARN",
+      message: `${sameDefault ? "checker 未显式配置（与 oracle/builder 同用默认模型）" : `checker 与 ${clashes.join("、")} 的模型相同（${checkerModel}）`}——交叉验证效果弱；建议 checker 选不同家族（provider 前缀）的模型，配置模板见 B仓 docs/agents-adoption.md example-2`,
+    };
+  }
+  return { name: "agent-model", level: "PASS", message: `checker=${checkerModel} 与 oracle=${oracleModel} / builder=${builderModel} 跨模型，交叉验证就绪` };
+}
+
 /** 命令行入口：--json / --help。退出码：有 FAIL → 1（检查失败），否则 0 */
 export async function main(args: string[], ctx: { cwd: string }): Promise<number> {
   let json = false;
@@ -263,7 +332,7 @@ export async function main(args: string[], ctx: { cwd: string }): Promise<number
     if (arg === "--json") {
       json = true;
     } else if (arg === "--help" || arg === "-h") {
-      console.log("用法：ocp doctor [--json]\n环境自检（git / opencode 与插件挂载 / agents 五文件 / 检索三通道 / vendored 状态）；只报告不安装");
+      console.log("用法：ocp doctor [--json]\n环境自检（git / opencode 与插件挂载 / agents 五文件 / 模型路由建议 / 检索三通道 / vendored 状态）；只报告不安装");
       return 0;
     } else {
       console.error(`未知参数：${arg}\n用法：ocp doctor [--json]`);
@@ -279,6 +348,11 @@ export async function main(args: string[], ctx: { cwd: string }): Promise<number
     checkOpencode(),
     await checkPlugin(join(home, ".config", "opencode", "opencode.json"), join(ctx.cwd, "opencode.json")),
     await checkAgents(join(home, ".config", "opencode", "agents"), [join(ctx.cwd, ".opencode", "agents"), join(ctx.cwd, ".opencode", "agent")]),
+    await checkModelRouting(
+      join(home, ".config", "opencode", "opencode.json"),
+      join(ctx.cwd, "opencode.json"),
+      [join(home, ".config", "opencode", "agents"), join(ctx.cwd, ".opencode", "agents"), join(ctx.cwd, ".opencode", "agent")],
+    ),
     checkRetrieval(loaded.config),
     await checkVendored(brepoRoot(), loaded.config),
   ];

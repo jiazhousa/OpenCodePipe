@@ -7,13 +7,13 @@
 
 B 仓 `agents/` 是**纯净定义源**——只含角色稳定内容（职责、调度协议、权限结构、对口 A 仓规章声明），不含任何用户环境值。**你的洞察**：任务/项目相关内容全部拆出，定义才能跨项目跨人复用（"换人依然成立"测试）。
 
-环境值共三处，部署时由你的配置承载：
+环境值共三处，部署时由你的配置承载。**模型策略（2026-09-18 拍板，参照 omo 模式）**：默认**零配置**——所有角色（含 checker）落 opencode 默认模型即可跑通；唯一值得显式配置的是 **checker 换不同家族（provider 前缀）的模型**，跨家族交叉验证是 checker 选型的核心价值（同模型自审易同盲区），`ocp doctor` 的 `agent-model` 项会在此建议缺失时 WARN 提示。
 
-| # | 环境值 | 载体 | 示例值 |
+| # | 环境值 | 载体 | 必要性 |
 |---|---|---|---|
-| 1 | **oracle 模型**（主会话调度者） | `agents/oracle.md` frontmatter | `zhipuai-coding-plan/glm-5.3` + `variant: max` |
-| 2 | **subagent 模型路由**（explorer/checker/builder/looker） | `opencode.json` 的 `agent` 段 | 见下方 example |
-| 3 | **权限白名单环境项** | 各 agent md 的 `permission` 段 | explorer 检索命令（ws/exa/tvly/ctx7）、checker edit 路径 |
+| 1 | oracle 模型（主会话调度者） | `agents/oracle.md` frontmatter | 可选（默认留空=用默认模型；本机实值 `zhipuai-coding-plan/glm-5.3`） |
+| 2 | **checker 跨家族模型**（唯一推荐配置） | `opencode.json` 的 `agent` 段 | **推荐**（与 oracle/builder 同 modelId 时 doctor WARN；其余 subagent 默认模型即可） |
+| 3 | 权限白名单环境项 | 各 agent md 的 `permission` 段 | 按需（explorer 检索命令、checker 规则库路径） |
 
 > B 仓源中上述位置为占位注释或示例值（标注"用户决策位"），**直接复制部署时必须先填 #1**，#2/#3 按需核对。
 
@@ -61,19 +61,18 @@ permission:                            # 白名单结构为纯净内容，保留
 ---
 ```
 
-### example-2：opencode.json 的 agent 段（subagent 模型路由）
+### example-2：opencode.json 的 agent 段（最小配置——仅 checker，2026-09-18 策略）
 
 ```jsonc
 {
   "agent": {
-    "explorer": { "model": "zhipuai-coding-plan/glm-5.3-flash", "variant": "high" },
-    "checker":  { "model": "deepseek/deepseek-flash", "variant": "max", "temperature": 0.1 },
-    "builder":  { "model": "zhipuai-coding-plan/glm-5.3", "variant": "high" },
-    "looker":   { "model": "zhipuai-coding-plan/glm-5.3-flash" }
-    // oracle 主定义也在此段：mode/model/prompt 指向 {file:./agents/oracle.md}
+    "checker": { "model": "deepseek/deepseek-flash", "variant": "max", "temperature": 0.1 }
+    // 其余角色不配 = 默认模型（零配置可跑；想要精细路由再逐个加，如 builder/explorer 用低价档）
   }
 }
 ```
+
+> 完整路由形态（本机实配，历史参考）：explorer=glm-5.3-flash/high、builder=glm-5.3/high、looker=glm-5.3-flash、oracle 主定义亦在此段（`prompt: "{file:./agents/oracle.md}"`）。
 
 ### example-3：explorer 检索命令白名单定制（环境项 #3）
 

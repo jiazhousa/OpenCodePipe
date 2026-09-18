@@ -26,7 +26,7 @@ stage_set(bd-score-panel, SPEC_APPROVED, 调度者)
 
 ### ② 接入五角色代理（一次性）
 
-复制 `agents/` 五件到 `~/.config/opencode/agents/` 并填环境值（模型选型、检索命令白名单、规则库路径）——完整步骤与 example 见 [docs/agents-adoption.md](docs/agents-adoption.md)。
+复制 `agents/` 五件到 `~/.config/opencode/agents/`——**零配置即可跑**（全部角色用默认模型）；唯一推荐显式配置的是 checker 换个不同家族的模型（跨家族交叉验证，`ocp doctor` 会提示）。完整步骤与 example 见 [docs/agents-adoption.md](docs/agents-adoption.md)。
 
 ### ③ 在项目里启用工作流
 

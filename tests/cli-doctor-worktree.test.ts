@@ -11,6 +11,7 @@ import {
   checkGit,
   checkOpencode,
   checkPlugin,
+  checkModelRouting,
   checkRetrieval,
   checkVendored,
   loadDoctorConfig,
@@ -327,5 +328,57 @@ describe("cli/index 路由", () => {
     expect(await cliMain([])).toBe(0);
     expect(await cliMain(["--help"])).toBe(0);
     expect(await cliMain(["definitely-not-a-command"])).toBe(2);
+  });
+});
+
+describe("checkModelRouting 模型路由建议（2026-09-18 用户策略）", () => {
+  let dir: string;
+  beforeEach(async () => {
+    dir = await mkdtemp(join(tmpdir(), "ocp-model-routing-"));
+  });
+  afterEach(async () => {
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  async function setup(configs: { global?: unknown; project?: unknown; agents?: Record<string, string> }) {
+    const globalPath = join(dir, "global-opencode.json");
+    const projectPath = join(dir, "project-opencode.json");
+    const agentsDir = join(dir, "agents");
+    if (configs.global !== undefined) await writeFile(globalPath, JSON.stringify(configs.global));
+    if (configs.project !== undefined) await writeFile(projectPath, JSON.stringify(configs.project));
+    if (configs.agents) {
+      await mkdir(agentsDir, { recursive: true });
+      for (const [name, model] of Object.entries(configs.agents)) {
+        await writeFile(join(agentsDir, `${name}.md`), `---\nmodel: ${model}\n---\n正文\n`);
+      }
+    }
+    return { globalPath, projectPath, agentsDir };
+  }
+
+  test("checker 与 oracle/builder 同 modelId → WARN（交叉验证弱提示）", async () => {
+    const { globalPath, projectPath, agentsDir } = await setup({
+      global: { agent: { checker: { model: "gw/glm-5.3" }, oracle: { model: "gw/glm-5.3" }, builder: { model: "gw/glm-5.3-flash" } } },
+    });
+    const r = await checkModelRouting(globalPath, projectPath, [agentsDir]);
+    expect(r.level).toBe("WARN");
+    expect(r.message).toContain("oracle=gw/glm-5.3");
+    expect(r.message).not.toContain("builder"); // builder 是 flash 不同 modelId，不进冲突清单
+  });
+
+  test("checker 跨家族 → PASS", async () => {
+    const { globalPath, projectPath, agentsDir } = await setup({
+      global: { agent: { checker: { model: "deepseek/deepseek-flash" }, builder: { model: "zhipuai/glm-5.3" } } },
+      agents: { oracle: "zhipuai/glm-5.3" },
+    });
+    const r = await checkModelRouting(globalPath, projectPath, [agentsDir]);
+    expect(r.level).toBe("PASS");
+    expect(r.message).toContain("交叉验证就绪");
+  });
+
+  test("全未配置（同默认模型）→ WARN 且文案区分", async () => {
+    const { globalPath, projectPath, agentsDir } = await setup({ agents: {} });
+    const r = await checkModelRouting(globalPath, projectPath, [agentsDir]);
+    expect(r.level).toBe("WARN");
+    expect(r.message).toContain("同用默认模型");
   });
 });
