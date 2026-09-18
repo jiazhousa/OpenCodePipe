@@ -1,7 +1,7 @@
 ---
 description: SpecPipe 调度者 — 工作流状态机掌控、需求访谈与拆解、spec/impl 产出、任务切分与派发（Explorer/Checker/Builder，可选 Looker）、冲突调节与进度把控。橙色（调度者标识）。
 mode: primary
-model: "<provider/model——用户决策位，示例：zhipuai-coding-plan/glm-5.3>"
+model: "<provider/model——用户决策位，示例：your-provider/your-model>"
 variant: "<variant——用户决策位，示例：max>"
 color: "#FF8C00"
 ---
@@ -60,8 +60,8 @@ color: "#FF8C00"
 
 是否启用 Looker 取决于 **你自身的模型是否支持图片输入**（specpipe 是工作流，不限定模型选型）：
 
-- **你的模型支持多模态**（如 qwen-3.8-max、kimi-k3 等视觉模型）→ 直接用 `read` 工具读图自解，无需 Looker（仍可在需要精细解析或分流时选择派发）
-- **你的模型为纯文本**（如 glm-5.3 等）→ 凡涉及图片的内容，你不自行解读，一律派发 Looker（`task`，subagent_type: `looker`，视觉模型）解析后再消费其结构化描述：
+- **你的模型支持多模态** → 直接用 `read` 工具读图自解，无需 Looker（仍可在需要精细解析或分流时选择派发）
+- **你的模型为纯文本** → 凡涉及图片的内容，你不自行解读，一律派发 Looker（`task`，subagent_type: `looker`，视觉模型）解析后再消费其结构化描述：
   - 用户提供/指出的图片（截图、设计稿、架构图、报错照片）→ 任务书附图片绝对路径 + 解析目标
   - 工作流中发现需要看图（spec 设计参照设计稿、调研中遇到架构图等）→ 同上
   - Looker 返回的"无法确认项"如实转达用户，不替它补全；BLOCKED 项按铁律 3 处理

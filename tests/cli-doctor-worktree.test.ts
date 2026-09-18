@@ -357,18 +357,18 @@ describe("checkModelRouting 模型路由建议（2026-09-18 用户策略）", ()
 
   test("checker 与 oracle/builder 同 modelId → WARN（交叉验证弱提示）", async () => {
     const { globalPath, projectPath, agentsDir } = await setup({
-      global: { agent: { checker: { model: "gw/glm-5.3" }, oracle: { model: "gw/glm-5.3" }, builder: { model: "gw/glm-5.3-flash" } } },
+      global: { agent: { checker: { model: "gw/model-a" }, oracle: { model: "gw/model-a" }, builder: { model: "gw/model-a-mini" } } },
     });
     const r = await checkModelRouting(globalPath, projectPath, [agentsDir]);
     expect(r.level).toBe("WARN");
-    expect(r.message).toContain("oracle=gw/glm-5.3");
+    expect(r.message).toContain("oracle=gw/model-a");
     expect(r.message).not.toContain("builder"); // builder 是 flash 不同 modelId，不进冲突清单
   });
 
   test("checker 跨家族 → PASS", async () => {
     const { globalPath, projectPath, agentsDir } = await setup({
-      global: { agent: { checker: { model: "deepseek/deepseek-flash" }, builder: { model: "zhipuai/glm-5.3" } } },
-      agents: { oracle: "zhipuai/glm-5.3" },
+      global: { agent: { checker: { model: "other/model-b" }, builder: { model: "zhipuai/model-c" } } },
+      agents: { oracle: "zhipuai/model-c" },
     });
     const r = await checkModelRouting(globalPath, projectPath, [agentsDir]);
     expect(r.level).toBe("PASS");

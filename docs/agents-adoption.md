@@ -11,7 +11,7 @@ B 仓 `agents/` 是**纯净定义源**——只含角色稳定内容（职责、
 
 | # | 环境值 | 载体 | 必要性 |
 |---|---|---|---|
-| 1 | oracle 模型（主会话调度者） | `agents/oracle.md` frontmatter | 可选（默认留空=用默认模型；本机实值 `zhipuai-coding-plan/glm-5.3`） |
+| 1 | oracle 模型（主会话调度者） | `agents/oracle.md` frontmatter | 可选（默认留空=用默认模型；填写形态 `<provider>/<model>`） |
 | 2 | **checker 跨家族模型**（唯一推荐配置） | `opencode.json` 的 `agent` 段 | **推荐**（与 oracle/builder 同 modelId 时 doctor WARN；其余 subagent 默认模型即可） |
 | 3 | 权限白名单环境项 | 各 agent md 的 `permission` 段 | 按需（explorer 检索命令、checker 规则库路径） |
 
@@ -21,7 +21,7 @@ B 仓 `agents/` 是**纯净定义源**——只含角色稳定内容（职责、
 
 | 产物 | 接入方式 | 一次性/每项目 |
 |---|---|---|
-| **stage 状态机插件** | `opencode.json` → `"plugin": ["file:///home/starlex/project/opencodepipe"]`（目录形态——宿主读 package.json 的 name 作插件名、`exports["./server"]` 作入口） | 一次（全局） |
+| **stage 状态机插件** | `opencode.json` → `"plugin": ["file:///<B仓本地路径>"]`（目录形态——宿主读 package.json 的 name 作插件名、`exports["./server"]` 作入口） | 一次（全局） |
 | **agents 五角色** | 本指南：复制 + 填值 → `~/.config/opencode/agents/` | 一次（全局） |
 | **CLI / pre-push** | 一次性装短命令：`ln -s <B仓>/cli/index.ts ~/.local/bin/ocp`（shebang `#!/usr/bin/env bun` 直执行）；此后每项目由 oracle 自动 `ocp doctor` + `ocp init` 铺设，无需手动 | 一次装命令；每项目自动 |
 
@@ -51,7 +51,7 @@ done
 ---
 description: SpecPipe 调度者 — 工作流状态机掌控、需求访谈与拆解、spec/impl 产出、任务派发与冲突调节。
 mode: primary
-model: zhipuai-coding-plan/glm-5.3    # ← B 仓源此处为占位注释，部署时填你的模型
+model: <provider>/<model>             # ← B 仓源此处为占位注释，部署时填你的模型
 variant: max                           # ← 同上
 permission:                            # 白名单结构为纯净内容，保留
   bash:
@@ -66,13 +66,13 @@ permission:                            # 白名单结构为纯净内容，保留
 ```jsonc
 {
   "agent": {
-    "checker": { "model": "deepseek/deepseek-flash", "variant": "max", "temperature": 0.1 }
+    "checker": { "model": "<跨家族 provider>/<model>", "variant": "max", "temperature": 0.1 }
     // 其余角色不配 = 默认模型（零配置可跑；想要精细路由再逐个加，如 builder/explorer 用低价档）
   }
 }
 ```
 
-> 完整路由形态（本机实配，历史参考）：explorer=glm-5.3-flash/high、builder=glm-5.3/high、looker=glm-5.3-flash、oracle 主定义亦在此段（`prompt: "{file:./agents/oracle.md}"`）。
+> 完整路由形态（可选）：explorer/builder/looker 可按成本与能力分层选型（如调研用低价档、编码用主力档）；oracle 主定义亦可在此段（`prompt` 指向 `{file:./agents/oracle.md}`）。
 
 ### example-3：explorer 检索命令白名单定制（环境项 #3）
 
@@ -109,7 +109,7 @@ mv ~/.config/opencode/agents-v1-backup-YYYYMMDD ~/.config/opencode/agents
 
 ## 七、本机部署记录（2026-09-17）
 
-- 部署内容：B 仓 `9329d9d` 期五件；oracle frontmatter 填实值（glm-5.3/max）
+- 部署内容：B 仓 `9329d9d` 期五件；oracle frontmatter 填实值（用户模型）
 - 与 v1 差异（语义零漂移，全为注释/声明/占位）：oracle 4 行（模型实值化 + 对口声明）、checker 4 行（对口声明 + QUALITY_GATE→DONE 终检加注）、explorer/builder/looker 各 2 行（对口声明）
 - v1 备份：`~/.config/opencode/agents-v1-backup-20260917`
 - opencode.json agent 段（subagent 模型路由）未动，继续生效

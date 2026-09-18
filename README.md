@@ -13,7 +13,7 @@
 `~/.config/opencode/opencode.json`：
 
 ```json
-{ "plugin": ["file:///home/starlex/project/opencodepipe"] }
+{ "plugin": ["file:///<B仓本地路径>"] }
 ```
 
 重启 opencode 后，会话中获得两个工作流工具：

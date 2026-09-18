@@ -32,5 +32,5 @@
 
 ## 环境注意事项
 
-- **checker subagent 跨 worktree 落盘**：本机会话工作区 ~/doc，edit/write 对 B 仓路径的权限匹配存在已知问题（绝对模式 allow 不生效），checker 经 bash python3 通道落盘可行——根治方案 = 从 B 仓根启动会话（roadmap 档案约定）
+- **checker subagent 跨 worktree 落盘**：会话工作区不在 B 仓根时，edit/write 对 B 仓路径的权限匹配存在已知问题（绝对模式 allow 不生效），checker 经 bash python3 通道落盘可行——根治方案 = 从 B 仓根启动会话（roadmap 档案约定）
 - opencode 1.18.31 插件加载行为：`isPathPluginSpec` 识别 file:///./绝对路径；全部运行时导出即插件函数；peerDependencies 的 @opentui/* 为 optional（不装也能 typecheck）

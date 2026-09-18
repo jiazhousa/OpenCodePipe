@@ -31,11 +31,11 @@ $ ocp init --hook          # 可选：加装 pre-push 薄壳（幂等覆盖）
 ```console
 $ ocp doctor
 [PASS] git：git version 2.43.0
-[PASS] opencode：可用（/home/starlex/.opencode/bin/opencode）
+[PASS] opencode：可用（~/.opencode/bin/opencode）
 [PASS] opencode-plugin：已挂载（全局）
 [PASS] agents：五文件齐全（全局）
-[PASS] retrieval：主检索：ws（/home/starlex/.local/bin/ws）；回退检索：exa（...）；库文档：ctx7（...）
-[PASS] vendored：10 件一致（source commit：1ecfe8dd...）；本地 A 仓：/home/starlex/project/specpipe（可运行 bun scripts/vendor-sync.ts --path ... 对比同步）
+[PASS] retrieval：主检索：ws（~/.local/bin/ws）；回退检索：exa（...）；库文档：ctx7（...）
+[PASS] vendored：10 件一致（source commit：1ecfe8dd...）；本地 A 仓：<A仓本地路径>（可运行 bun scripts/vendor-sync.ts --path ... 对比同步）
 汇总：PASS 6 / WARN 0 / FAIL 0
 ```
 

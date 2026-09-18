@@ -23,7 +23,7 @@
 | S1 | A 仓规章 v1 | ✅ DONE | M1 规章冻结 |
 | S2 | B 仓核心（4 部件：骨架 / 转移表数据 / stage 插件 / agents） | ✅ DONE（2026-09-17，质量门 94/100 + fence 三步全绿；插件 file:// 挂载实证、五角色迁移保真 diff） | M2 前半 |
 | S3 | B 仓 CLI（5 部件：init / doctor / worktree / pre-push / check-tools） | ✅ DONE（2026-09-17，质量门 98/100 + fence 四步全绿；pre-push 真机四情形验证 + B 仓自举；vendored 基线 1ecfe8dd9b21004b51b93b58dea7b71d40485ce9） | **M2 强制层就绪 ✅** |
-| S4 | 组合验收（4 部件：user-rule / 实跑 / 退役 / Epic 终检） | 🔄 4b 实证达成（2026-09-18 真实需求实跑，见 s4b-live-run-record.md）；剩 4a/4c/4d | **M3 切换完成 → ALL_DONE** |
+| S4 | 组合验收（4 部件：user-rule / 实跑 / 退役 / Epic 终检） | 🔄 4b ✅（真实需求实跑）/ 4a+4c ✅（2026-09-18 内容分层 Story：全局层建立+十二节升格、B 仓净化、BOOTSTRAP 替换 ocp init——**4c"全局 AGENTS.md 指引更新"子项落点=该 Story 全局层建立**，全局层内容为用户规则不含工作流指引）；剩 4d Epic 终检 | **M3 切换完成 → ALL_DONE** |
 | S5 | 四层试点（候选，待立项确认）：变更式 spec + FR 锚点 + Task.yaml 手写 + 校验脚本 + A 仓 v1.1（修订 02/03/06/07 卷） | 🆕 建议 | M4 v3 起点 |
 
 ### 部件级拆分（验收单元）
@@ -82,6 +82,7 @@
 - [x] GitHub 创建 OpenCodePipe 仓
 - [x] 凭证落盘（~/.env；2026-09-17 已轮换）
 - [x] Story 4 实跑载体确认——无需再定：2026-09-18 真实需求（商机分配页联系人列）自然充当载体，4b 验收达成
+- [x] 4a/4c 收尾（2026-09-18 Story specpipe-v2-s4-wrapup）：user-rule 载体=opencode 原生 AGENTS.md 分层（十二节升格全局层）；B 仓个人内容零残留（口径钉死，specpipe-v2-s4-wrapup spec）
 - [ ] Story 5 立项确认（写入 epic-spec 路线图节）
 - [ ] S4/npm 发布前定 B↔A 版本关联策略（B 仓版本号与 A 仓契约版本显式映射 + doctor 报告锁定版本）——2026-09-17 消费者责任模式风险评估产出
 
