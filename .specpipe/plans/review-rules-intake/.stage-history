@@ -1,1 +1,6 @@
 {"ts":"2026-09-18T22:17:17+08:00","topic":"review-rules-intake","from":null,"to":"ISSUE_IMPL_DRAFT","actor":"调度者"}
+{"ts":"2026-09-18T22:25:00+08:00","topic":"review-rules-intake","from":"ISSUE_IMPL_DRAFT","to":"ISSUE_IMPL_REVIEWING","actor":"调度者","note":"跨仓手工落定（插件wf根绑定会话目录，问题#7）"}
+{"ts":"2026-09-18T23:05:00+08:00","topic":"review-rules-intake","from":"ISSUE_IMPL_REVIEWING","to":"ISSUE_IMPL_APPROVED","actor":"审查者","note":"用户本地review PASS（2026-09-18）"}
+{"ts":"2026-09-18T23:05:10+08:00","topic":"review-rules-intake","from":"ISSUE_IMPL_APPROVED","to":"WORKING","actor":"调度者"}
+{"ts":"2026-09-18T23:05:20+08:00","topic":"review-rules-intake","from":"WORKING","to":"QUALITY_GATE","actor":"调度者"}
+{"ts":"2026-09-18T23:05:30+08:00","topic":"review-rules-intake","from":"QUALITY_GATE","to":"DONE","actor":"调度者","note":"质量门依据：ocp check 五项全绿（whitespace/platform-words/line-budget/commit-format/transition-consistency）+ 用户review PASS"}
