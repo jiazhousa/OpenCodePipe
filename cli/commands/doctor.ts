@@ -2,12 +2,12 @@
 // 配置二级查找：项目级 {wf}/doctor-config.json（ocp init 生成模板）→ 用户级 ~/.config/opencodepipe/doctor.json，
 // 项目级优先，均无 → 相关项 WARN「未声明」。
 // 探测函数全部接受注入参数（假配置/假目录/假探测函数），支持函数级断言；CLI 层默认注入真实环境。
-import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { brepoRoot } from "../brepo-root";
+import { checkVendorHashes, type TableFile } from "../../check-tools/transition-consistency";
 
 export type CheckLevel = "PASS" | "WARN" | "FAIL";
 
@@ -196,20 +196,11 @@ export function checkRetrieval(config: DoctorConfig, probe: Probe = (cmd) => Bun
   return { name: "retrieval", level, message: `${parts.join("；")}${hint}` };
 }
 
-/** 文件 sha256（十六进制） */
-async function sha256File(path: string): Promise<string> {
-  return createHash("sha256").update(await readFile(path)).digest("hex");
-}
-
-interface VendorSection {
-  repo?: string;
-  commit?: string;
-  files?: Record<string, string>;
-}
-
 /**
  * vendored 状态：configs/vendor/specpipe/ 逐件哈希比对 transition-table.json 的 vendor 段声明（D6 形态，
  * 块D vendor-sync 首跑产出；此前无 vendor 段属预期 → WARN 未基线）。localARepoPath 以附注形式提示对比入口。
+ * 哈希校验复用 check-tools/transition-consistency ① 层（L5 重构：单一实现两处消费，
+ * 消灭 doctor 自实现循环与 ① 层的语义重叠——且比原实现多覆盖"声明键集与十件清单恰一致"校验）。
  * 哈希不匹配 = 篡改检测命中 → FAIL（确凿）；未铺设/未基线 = WARN。
  */
 export async function checkVendored(root: string, config: DoctorConfig): Promise<CheckResult> {
@@ -225,35 +216,23 @@ export async function checkVendored(root: string, config: DoctorConfig): Promise
   if (!existsSync(tablePath) || !existsSync(vendorDir)) {
     return { name: "vendored", level: "WARN", message: `vendored 未铺设（${vendorDir} 不存在）：先运行 bun scripts/vendor-sync.ts${note}` };
   }
-  let vendor: VendorSection | undefined;
+  let table: unknown;
   try {
-    const table: unknown = JSON.parse(await readFile(tablePath, "utf8"));
-    if (table !== null && typeof table === "object" && !Array.isArray(table)) {
-      vendor = (table as Record<string, unknown>).vendor as VendorSection | undefined;
-    }
+    table = JSON.parse(await readFile(tablePath, "utf8"));
   } catch (error) {
     return { name: "vendored", level: "WARN", message: `transition-table.json 解析失败：${error instanceof Error ? error.message : String(error)}${note}` };
   }
-  const files = vendor?.files;
-  if (!files || Object.keys(files).length === 0) {
+  const vendor = table !== null && typeof table === "object" && !Array.isArray(table)
+    ? (table as Record<string, unknown>).vendor as { commit?: string; files?: Record<string, string> } | undefined
+    : undefined;
+  if (!vendor?.files || Object.keys(vendor.files).length === 0) {
     return { name: "vendored", level: "WARN", message: `vendored 未基线（transition-table.json 无 vendor 段）：先运行 bun scripts/vendor-sync.ts${note}` };
   }
-  const mismatches: string[] = [];
-  for (const [relPath, declared] of Object.entries(files)) {
-    const filePath = join(vendorDir, relPath);
-    if (!existsSync(filePath)) {
-      mismatches.push(`${relPath} 缺失`);
-      continue;
-    }
-    const actual = await sha256File(filePath);
-    if (actual !== declared) {
-      mismatches.push(`${relPath} 哈希不匹配`);
-    }
+  const item = checkVendorHashes(join(root, "configs"), table as TableFile);
+  if (!item.pass) {
+    return { name: "vendored", level: "FAIL", message: `哈希校验失败：${item.problems.join("；")}（${vendor.commit ?? "未知 commit"}）${note}` };
   }
-  if (mismatches.length > 0) {
-    return { name: "vendored", level: "FAIL", message: `哈希校验失败：${mismatches.join("；")}（${vendor?.commit ?? "未知 commit"}）${note}` };
-  }
-  return { name: "vendored", level: "PASS", message: `${Object.keys(files).length} 件一致（source commit：${vendor?.commit ?? "未知"}）${note}` };
+  return { name: "vendored", level: "PASS", message: `${Object.keys(vendor.files).length} 件一致（source commit：${vendor.commit ?? "未知"}）${note}` };
 }
 
 /** opencode.json 整对象读取：不存在 → null（该级未配置）；解析失败/非对象 → 抛出 */

@@ -92,9 +92,9 @@
 |---|---|---|---|
 | L1 | CI 建设（typecheck+test+smoke+consistency） | S2 用户裁决暂缓 | 待 S4 或 npm 发布前 |
 | L2 | npm 发布准备：exports 键调整（`./server`/`main` 才被宿主 loader 消费）+ zod 已转直接依赖 ✅ | S2 发现项 1/2 | 待 S4 |
-| L3 | checker 跨 worktree edit 权限问题（本机会话工作区 ~/doc 时，checker 对 B 仓路径的绝对模式 allow 不生效，经 python3 通道落盘） | S2/S3 审查环境备注 | 根治=从 B 仓根启动会话；或后续修 checker 白名单相对形态 |
-| L4 | B 仓自举 hook 为手工变体（与 init 模板三处文本差异，行为等价） | S3 质量门备查 | 可择机统一为 init 生成物 |
-| L5 | doctor vendored 检查与 transition-consistency ① 层语义重叠（块A 等价自实现） | S3 块A 发现项 | 行为一致，重构复用可选 |
+| L3 | checker 跨 worktree edit 权限问题（本机会话工作区 ~/doc 时，checker 对 B 仓路径的绝对模式 allow 不生效，经 python3 通道落盘） | S2/S3 审查环境备注 | 双层拦截定性（2026-09-18 查证 opencode 权限文档）：外层 external_directory 闸门（会话外路径）+ 内层 edit pattern 匹配。本机快解=全局白名单已扩 A/B 仓路径；根治（edit 绝对模式匹配实证 + 跨仓权限规约定型）并入 L8/S5 跨仓调度模式 |
+| L4 | B 仓自举 hook 为手工变体（与 init 模板三处文本差异，行为等价） | S3 质量门备查 | 克隆机（2026-09-18）经 hookTemplate() 生成物安装，零漂移（不跑 init --hook 避免七件双轨）；开发机手工变体待开发机侧重装 |
+| L5 | doctor vendored 检查与 transition-consistency ① 层语义重叠（块A 等价自实现） | S3 块A 发现项 | ✅ DONE（ledger-first-batch）：checkVendorHashes 导出复用，doctor 特有语义（WARN 分级/note 附注）保留；测试夹具升级十件全量对齐 ① 层严格口径 |
 | L6 | 本机会话工作流档案 .stage 手写时代无 history 留痕（pre-push 存量豁免覆盖） | S2 前历史事实 | 无需补；S4 起新 topic 走 stage_set 插件留痕 |
 | L7 | agents 环境值手工适配易漂移（纯净源演进后部署实例需人肉 diff 合并：白名单命令/规则库路径等环境值与源变更混在同文件） | 2026-09-18 第二台机器部署发现（review-rules-intake / ocp-link-cli 两 Issue 佐证） | Story 级候选：doctor 加 agents-deployment 占位感知 diff 检查项，或 `ocp agents deploy` 子命令（复制+环境值三路合并）；可并入 S5「配置↔部署一致性」主题 |
 | L8 | 跨仓调度模式未定义——会话目录外项目的工作流操作：stage 工具无目标目录参数（绑定会话目录本身是正确设计与安全边界），A 仓规章无跨仓档案落位约定 | 2026-09-18 workbench 会话管理 B 仓 Issue 实测（stage_set 写至会话根，手工搬运修正） | 定性=体系缺口而非插件缺陷；根治候选：①规章先行——A 仓补跨仓约定（档案落被操作仓+手工留痕 JSONL 格式正化）②工具参数化——stage 工具加可选目录参数（须配套权限边界，如仅限 external_directory 白名单）；建议并入 S5 或独立 Story |

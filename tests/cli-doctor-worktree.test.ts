@@ -6,6 +6,7 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { main as cliMain } from "../cli/index";
+import { VENDOR_FILE_PATHS } from "../check-tools/transition-consistency";
 import {
   checkAgents,
   checkGit,
@@ -185,22 +186,26 @@ describe("checkRetrieval", () => {
 });
 
 describe("checkVendored", () => {
-  /** 造一个假 B 仓根：vendor 段声明两件 + configs/vendor/specpipe/ 实际两件，返回 {root, files} */
+  /**
+   * 造一个假 B 仓根：按 VENDOR_FILE_PATHS 十件全量铺设 + vendor 段全量声明（L5 重构后复用 ① 层，
+   * ① 层校验"声明键集与十件清单恰一致"——夹具必须十件齐才进得了 PASS 路径），返回 root。
+   * tamper：07=篡改 07 卷内容 / missing=删除一件模板。
+   */
   async function makeFakeBrepo(tamper?: "07" | "missing"): Promise<string> {
     const root = await mkdtemp(join(tmpdir(), "ocp-vendor-"));
     const vendorDir = join(root, "configs", "vendor", "specpipe");
     await mkdir(join(vendorDir, "templates"), { recursive: true });
     const files: Record<string, string> = {};
-    const p07 = join(vendorDir, "07-state-machine.md");
-    const pTpl = join(vendorDir, "templates", "spec-template.md");
-    await writeFile(p07, "state machine contract v1\n");
-    await writeFile(pTpl, "spec template v1\n");
-    files["07-state-machine.md"] = createHash("sha256").update("state machine contract v1\n").digest("hex");
-    files["templates/spec-template.md"] = createHash("sha256").update("spec template v1\n").digest("hex");
+    for (const rel of VENDOR_FILE_PATHS) {
+      const abs = join(vendorDir, rel);
+      const content = `${rel} v1\n`;
+      await writeFile(abs, content);
+      files[rel] = createHash("sha256").update(content).digest("hex");
+    }
     if (tamper === "07") {
-      await writeFile(p07, "tampered\n");
+      await writeFile(join(vendorDir, "07-state-machine.md"), "tampered\n");
     } else if (tamper === "missing") {
-      await rm(pTpl);
+      await rm(join(vendorDir, "templates", "spec-template.md"));
     }
     await writeFile(
       join(root, "configs", "transition-table.json"),
@@ -214,7 +219,7 @@ describe("checkVendored", () => {
     try {
       const result = await checkVendored(root, { localARepoPath: base });
       expect(result.level).toBe("PASS");
-      expect(result.message).toContain("2 件一致");
+      expect(result.message).toContain("10 件一致");
       expect(result.message).toContain("abc123");
       expect(result.message).toContain("vendor-sync");
     } finally {
@@ -228,7 +233,7 @@ describe("checkVendored", () => {
       try {
         const result = await checkVendored(root, {});
         expect(result.level).toBe("FAIL");
-        expect(result.message).toContain(tamper === "07" ? "哈希不匹配" : "缺失");
+        expect(result.message).toContain(tamper === "07" ? "哈希不符" : "缺失");
       } finally {
         await rm(root, { recursive: true, force: true });
       }

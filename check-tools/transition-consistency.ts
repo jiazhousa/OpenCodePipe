@@ -57,7 +57,7 @@ interface VendorDecl {
 }
 
 /** 数据文件顶层（仅列本模块消费的字段） */
-interface TableFile {
+export interface TableFile {
   version?: number;
   source?: string;
   states?: StateDef[];
@@ -85,8 +85,8 @@ export interface ConsistencyResult {
 /** 边唯一键（D7 比较键：from→to|trigger|actor，同目标双边靠 trigger 区分；建档边 from 记 ∅） */
 const edgeKey = (edge: EdgeDef): string => `${edge.from ?? "∅"}→${edge.to}|${edge.trigger}|${edge.actor}`;
 
-/** ① vendored 哈希：遍历 vendor.files 全量逐件重算 sha256 比对（07 与 templates 九件都查）；另校验声明键集与十件清单恰一致，防残缺声明自洽通过 */
-function checkVendorHashes(configsDir: string, table: TableFile): ConsistencyItem {
+/** ① vendored 哈希：遍历 vendor.files 全量逐件重算 sha256 比对（07 与 templates 九件都查）；另校验声明键集与十件清单恰一致，防残缺声明自洽通过。导出供 doctor checkVendored 复用（L5 重构：单一实现两处消费） */
+export function checkVendorHashes(configsDir: string, table: TableFile): ConsistencyItem {
   const name = "① vendored 哈希（vendor.files 十件全量逐一重算）";
   const problems: string[] = [];
   const vendor = table.vendor;
