@@ -1,7 +1,7 @@
 # Agents 接管指南（v1 旧版 → B 仓纯净源）
 
 > 适用：把 OpenCodePipe（B 仓）`agents/` 五角色定义部署为你的 opencode 全局 agents，替代 v1 旧版。
-> 本机首例部署：2026-09-17（见文末记录）。
+> 部署实例一（开发机，2026-09-17，见文末记录）。
 
 ## 一、理念：纯净源 vs 部署实例
 
@@ -14,6 +14,7 @@ B 仓 `agents/` 是**纯净定义源**——只含角色稳定内容（职责、
 | 1 | oracle 模型（主会话调度者） | `agents/oracle.md` frontmatter | 可选（默认留空=用默认模型；填写形态 `<provider>/<model>`） |
 | 2 | **checker 跨家族模型**（唯一推荐配置） | `opencode.json` 的 `agent` 段 | **推荐**（与 oracle/builder 同 modelId 时 doctor WARN；其余 subagent 默认模型即可） |
 | 3 | 权限白名单环境项 | 各 agent md 的 `permission` 段 | 按需（explorer 检索命令、checker 规则库路径） |
+| 4 | checker 规则库部署实例 | `~/.config/opencode/review-rules/` | 部署时复制：`cp -r <B仓>/configs/review-rules ~/.config/opencode/review-rules/`（checker.md 中的引用路径，缺失则代码质量审查降级为无规则注入） |
 
 > B 仓源中上述位置为占位注释或示例值（标注"用户决策位"），**直接复制部署时必须先填 #1**，#2/#3 按需核对。
 
@@ -35,6 +36,9 @@ cp -r ~/.config/opencode/agents ~/.config/opencode/agents-v1-backup-$(date +%Y%m
 for a in oracle explorer checker builder looker; do
   cp ~/project/opencodepipe/agents/$a.md ~/.config/opencode/agents/$a.md
 done
+
+# ②b 复制 checker 规则库（环境值 #4）
+cp -r ~/project/opencodepipe/configs/review-rules ~/.config/opencode/review-rules
 
 # ③ 填 oracle 环境值（见 example-1，把占位行改为实值）
 
@@ -96,7 +100,7 @@ permission:
 ## 五、验证清单
 
 - [ ] 五件 frontmatter YAML 可解析（`python3 -c "import yaml,re; ..."` 快速校验）
-- [ ] oracle 无占位残留：`grep -L "用户决策位" ~/.config/opencode/agents/*.md`（应列出全部五件或空）
+- [ ] 无占位残留：`grep -rn "<[^>]*——用户决策位" ~/.config/opencode/agents/*.md`（应无输出；注意勿用 `grep "用户决策位"`——源文件对口声明注释本身含该词，恒误报）
 - [ ] 新会话 agent 列表五角色齐全，oracle 模型为实值
 - [ ] 派发一个小任务（explorer 调研即可）走通
 
@@ -107,7 +111,7 @@ rm -rf ~/.config/opencode/agents
 mv ~/.config/opencode/agents-v1-backup-YYYYMMDD ~/.config/opencode/agents
 ```
 
-## 七、本机部署记录（2026-09-17）
+## 七、部署实例一记录（开发机，2026-09-17）
 
 - 部署内容：B 仓 `9329d9d` 期五件；oracle frontmatter 填实值（用户模型）
 - 与 v1 差异（语义零漂移，全为注释/声明/占位）：oracle 4 行（模型实值化 + 对口声明）、checker 4 行（对口声明 + QUALITY_GATE→DONE 终检加注）、explorer/builder/looker 各 2 行（对口声明）

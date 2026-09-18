@@ -10,6 +10,7 @@
 # ① 挂载插件：opencode.json 的 plugin 数组 → "file:///<B仓本地路径>"（目录形态）
 # ② 接入五角色：复制本仓 agents/ 五件至 ~/.config/opencode/agents/ 并填环境值
 #    ——完整步骤与 example 见 docs/agents-adoption.md（零模型配置即可跑，checker 建议跨家族）
+# ②b 复制 checker 规则库：cp -r <B仓>/configs/review-rules ~/.config/opencode/review-rules
 # ③ 装短命令：ln -s <B仓>/cli/index.ts ~/.local/bin/ocp
 # ④ 在使用项目里：ocp init（铺设 {wf}/ 七件；--hook 可选装 pre-push）
 ```
