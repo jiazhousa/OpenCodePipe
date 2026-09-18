@@ -1,8 +1,56 @@
 # OpenCodePipe
 
-**SpecPipe 完整工程化实践在 OpenCode 上的体现与最后一公里**——插件、CLI 工具包与代理定义，在 OpenCode 平台上践行 [SpecPipe](https://github.com/jiazhousa/SpecPipe) 规章中的工作流与工件规范。
+**SpecPipe 在 OpenCode 上的最后一公里**——状态机插件、五角色代理、CLI 工具族，把 [SpecPipe](https://github.com/jiazhousa/SpecPipe) 规章中的"先规格后编码"工作流变成**可强制执行**的工程制度。
 
-> 体系三层：**Spec 哲学（思想根基）→ SpecPipe（方法论，平台无关）→ OpenCodePipe（本仓 · 工具集）**。SpecPipe 定义"应该怎样"（工作流 + 工件规范）；本仓负责"强制做到"（状态机校验、权限白名单、质量门前置、机械检查）。判断交给模型，强制交给代码。
+> 体系三层：**Spec 哲学（思想根基）→ SpecPipe（A 仓 · 方法论，平台无关）→ OpenCodePipe（本仓 · 工具集）**。SpecPipe 定义"应该怎样"；本仓负责"强制做到"。**判断交给模型，强制交给代码。**
+
+**当前状态**：M2 强制层就绪（本仓自身开发即在本体系上运行——自举实证）。
+
+## 快速开始（三步）
+
+### ① 挂载状态机插件（一次性）
+
+`~/.config/opencode/opencode.json`：
+
+```json
+{ "plugin": ["file:///home/starlex/project/opencodepipe/src/plugin/index.ts"] }
+```
+
+重启 opencode 后，会话中获得两个工作流工具：
+
+```
+stage_get(bd-score-panel)   → "SPEC_USER_AUDIT"（读当前阶段）
+stage_set(bd-score-panel, SPEC_APPROVED, 调度者)
+                            → 校验转移合法性（拒绝非法跳转）+ .stage-history 留痕
+```
+
+### ② 接入五角色代理（一次性）
+
+复制 `agents/` 五件到 `~/.config/opencode/agents/` 并填环境值（模型选型、检索命令白名单、规则库路径）——完整步骤与 example 见 [docs/agents-adoption.md](docs/agents-adoption.md)。
+
+### ③ 在项目里启用工作流
+
+```console
+$ ln -s ~/project/opencodepipe/cli/index.ts ~/.local/bin/ocp   # 一次性装短命令
+$ cd your-project
+$ ocp init            # 铺 {wf}/ 七件（plans/reviews/templates/doctor-config/fence.sh...）
+$ ocp doctor          # 环境自检：插件挂载/agents/检索通道/vendored 一致性
+```
+
+之后对话即可驱动工作流——"帮我做 XXX 需求"，Oracle 按 [SpecPipe 规章](https://github.com/jiazhousa/SpecPipe) 走 S0→S10/Issue 路径；`--hook` 可选加装 pre-push（见下）。
+
+## 机制总览：六个卡点，各有把守者
+
+| 卡点 | 把守者 | 强制方式 |
+|---|---|---|
+| 规格先行 | `ocp init` | 铺设工作流目录与规格模板（vendored 九件） |
+| 状态纪律 | **stage 插件**（`stage_get`/`stage_set`） | 18 态转移表校验，非法转移拒绝 + JSONL 留痕 |
+| 角色纪律 | `agents/` 五角色 | 权限白名单（checker 限审查目录、explorer 只读） |
+| 推送纪律 | `ocp hook pre-push` | 代码变更须 topic `.stage=DONE`（Epic 豁免、fail-open） |
+| 文档纪律 | `ocp check` 五项 | whitespace / line-budget / commit-format / 转移表一致性 / 平台词 |
+| 环境正确 | `ocp doctor` | 二级配置自检，只报告不安装 |
+
+另有 `ocp worktree`（三级分支名校验 `dev/feat/xxx` + 五步指引）。CLI 完整示例见 [docs/cli-usage.md](docs/cli-usage.md)。
 
 ## 机制与用户决策的边界
 
@@ -11,33 +59,32 @@
 | 归属 | 内容 | 形态 |
 |---|---|---|
 | 本仓（机制） | 状态转移校验、权限白名单骨架、机械检查、目录铺设、环境自检 | 代码 + 默认配置 |
-| 用户决策（配置） | 各角色模型与提供方、检索三通道的具体命令、目录名、分支名 | 用户配置声明 + doctor 自检发现 |
+| 用户决策 | 各角色模型与提供方、检索三通道命令、目录名、分支名 | 用户配置声明 + doctor 自检发现 |
 
-检索三通道（主搜索 / 备选搜索 / 文档查询，职责契约见 A 仓 `08-roles.md`）由用户自备并声明命令——**本仓不内置任何检索脚本**，`ocp doctor` 仅检测已声明命令的可用性并报告。
+检索三通道（主/备搜索、文档查询，职责契约见 A 仓 `08-roles.md`）由用户自备——**本仓不内置任何检索脚本**。
 
-## 命名基线
+## 目录
 
-- 仓库名：`OpenCodePipe`
-- CLI 命令：`ocp`（如 `ocp init` / `ocp doctor` / `ocp check`；stage 读写能力归 opencode 插件，非 CLI 命令）
-- npm 包名：`opencodepipe`
-
-## 目录规划
-
-| 目录 | 规划内容 | 交付归属 |
-|---|---|---|
-| `src/` | 单包工程代码：`core/`（转移表数据文件加载 + `{wf}` 路径解析）+ `plugin/`（插件入口，`plugin/` 规划目录的实现落位） | Story 2 |
-| `plugin/` | 状态机插件：`stage_get` / `stage_set`（转移合法性校验 + `.stage-history` 留痕，转移表以数据文件加载 A 仓 `07-state-machine.md` 契约）；**实现入口位于 `src/plugin/`，本目录为规划占位说明** | Story 2 |
-| `agents/` | 五角色代理定义迁移（调度者/调研者/审查者/执行者/视觉解析者）+ 权限白名单，文件头声明对口 A 仓 `08-roles.md` | Story 2 |
-| `cli/` | `ocp` 命令族：init（铺设工作流目录与模板）/ doctor（环境自检）/ worktree（分支工作树）/ check（机械检查路由五项）/ hook（pre-push 校验入口，`.stage=DONE` 质量门前置强制） | Story 3 |
-| `check-tools/` | 机械检查项：whitespace（尾随空白 + EOF 换行）/ line-budget（工件行数预算）/ commit-format（commit 格式）/ transition-consistency（转移表三层一致性：vendored 哈希 / schema / 快照对账）/ platform-words（平台词扫描，覆盖原禁词场景）；预留 Task.yaml 图论校验模块位 | Story 3 |
-| `configs/` | 可配置数据：状态转移表数据文件、Git 分支策略默认值、用户配置项默认值与声明接口、规则库（自 v1 迁移） | Story 2/3 |
-
-> 各目录当前为规划占位，随对应 Story 交付填充——**本仓自身开发走 SpecPipe 工作流**（规格先行，档案见工作流目录）。
+| 目录 | 内容 |
+|---|---|
+| `src/plugin/` | 状态机插件（入口，`plugin/` 目录为规划说明）；`src/core/` 转移表加载与 `{wf}` 路径解析 |
+| `agents/` | 五角色代理定义（纯净源，环境值占位） |
+| `cli/` | `ocp` 命令族（init / doctor / worktree / check / hook） |
+| `check-tools/` | 五项机械检查；预留 Task.yaml 图论校验模块位（v3） |
+| `configs/` | 转移表数据文件、vendored 规章副本（`vendor/`，基线哈希声明）、规则配置 |
 
 ## 与 SpecPipe 的关系
 
-- 规章事实源在 A 仓（[SpecPipe](https://github.com/jiazhousa/SpecPipe)），本仓以 **vendored 副本**携带规章（发版时从 A 仓拉取 tag + 转移表一致性校验后打包），运行时代理只读本地文件
-- 用户规则（user-rule）按 A 仓 `10-composition.md` 的组合覆盖机制叠加于本仓默认配置之上
+- 规章事实源在 A 仓 [SpecPipe](https://github.com/jiazhousa/SpecPipe)；本仓以 **vendored 副本**携带契约（`configs/vendor/`，十件 sha256 声明），`scripts/vendor-sync.ts` 检测契约变更，转移表一致性进 fence 持续校验
+- A 仓演进自由、B 仓锁定版本跟随：同步两段式（机械同步 + 语义适配开 Story/Issue）
+- 用户规则（user-rule）按 A 仓 `10-composition.md` 组合覆盖叠加于本仓默认配置之上
+
+## 文档
+
+- [docs/agents-adoption.md](docs/agents-adoption.md) — 五角色接入指南（含 example 与环境值清单）
+- [docs/cli-usage.md](docs/cli-usage.md) — CLI 五命令实测示例
+- [docs/BOOTSTRAP.md](docs/BOOTSTRAP.md) — 新机器环境恢复引导
+- [AGENTS.md](AGENTS.md) — 本仓开发记忆（SpecPipe 工作流档案见 `.specpipe/`）
 
 ## License
 
