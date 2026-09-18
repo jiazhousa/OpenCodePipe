@@ -1,7 +1,7 @@
 # 新机器 Bootstrap 引导
 
 > 目标：在全新机器上恢复 SpecPipe 工作流开发环境，可直接迭代 OpenCodePipe（B 仓）。
-> 前置：git（凭据见 `~/.env` 与 `~/.git-credentials` 迁移）、[opencode](https://opencode.ai)、tmux。
+> 前置：git（凭据见 `~/.env` 与 `~/.git-credentials` 迁移）、[opencode](https://opencode.ai)、tmux、bun（任一途径：官方安装器 / `npm i -g bun` / 借用任一项目 devDep 二进制——仅本仓 `bun install` 时需要，此后 CLI 走 wrapper 不依赖全局）。
 > **当前进度与继续迭代入口**：见 `.specpipe/plans/specpipe-v2-split/roadmap.md`「当前状态」节（M2 强制层已就绪，S2/S3 交付，下一步 S4）。
 
 ## 1. 恢复工作流引擎（新体系，2026-09-18 起替代 v1 skill 过渡方案）
@@ -11,7 +11,7 @@
 # ② 接入五角色：复制本仓 agents/ 五件至 ~/.config/opencode/agents/ 并填环境值
 #    ——完整步骤与 example 见 docs/agents-adoption.md（零模型配置即可跑，checker 建议跨家族）
 # ②b 复制 checker 规则库：cp -r <B仓>/configs/review-rules ~/.config/opencode/review-rules
-# ③ 装短命令：ln -s <B仓>/cli/index.ts ~/.local/bin/ocp
+# ③ 装短命令：bash scripts/link-cli.sh（生成 ~/.local/bin/ocp wrapper，走本仓 devDep 的 bun；B 仓移位后重跑）
 # ④ 在使用项目里：ocp init（铺设 {wf}/ 七件；--hook 可选装 pre-push）
 ```
 

@@ -1,6 +1,6 @@
 # ocp CLI 使用指南（含实测示例）
 
-> 所有示例为本机实测输出（2026-09-18，B 仓 `d898872` 期）。安装：`ln -s <B仓>/cli/index.ts ~/.local/bin/ocp`（shebang bun 直执行）。
+> 所有示例为本机实测输出（2026-09-18，B 仓 `d898872` 期）。安装：`bash scripts/link-cli.sh`（生成 `~/.local/bin/ocp` wrapper，走本仓 devDep 的 bun，不依赖全局 bun）。
 > 退出码全命令统一：**0=成功 / 1=检查失败 / 2=用法错误**。
 
 ## `ocp init` —— 铺设工作流环境

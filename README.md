@@ -31,7 +31,7 @@ stage_set(bd-score-panel, SPEC_APPROVED, 调度者)
 ### ③ 在项目里启用工作流
 
 ```console
-$ ln -s ~/project/opencodepipe/cli/index.ts ~/.local/bin/ocp   # 一次性装短命令
+$ bash scripts/link-cli.sh   # 一次性装短命令（生成 ~/.local/bin/ocp wrapper；前置=本仓已 bun install）
 $ cd your-project
 $ ocp init            # 铺 {wf}/ 七件（plans/reviews/templates/doctor-config/fence.sh...）
 $ ocp doctor          # 环境自检：插件挂载/agents/检索通道/vendored 一致性
