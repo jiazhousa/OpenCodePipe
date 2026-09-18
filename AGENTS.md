@@ -5,7 +5,7 @@
 ## 开发模式
 
 - **直接 main 迭代**（用户 2026-09-17 拍板）：不建分支不走 PR；10-composition 的分支策略面向使用方项目
-- 质量保障：`bun run fence`（typecheck → test → smoke 三步，报告落 `test-fence-reports/`）
+- 质量保障：`bun run fence`（typecheck → test → smoke → consistency 四步，报告落 `test-fence-reports/`）
 - 依赖版本策略：`@opencode-ai/plugin 1.18.*`（锁 major.minor，patch 浮动）+ bun.lock 固化 + fence smoke 兜底；兼容性承诺仅 V1 宿主 1.18.x
 
 ## 已交付（按 Story）
@@ -29,6 +29,15 @@
 - **doctor 二级配置**：项目级 `{wf}/doctor-config.json` → 用户级 `~/.config/opencodepipe/doctor.json`；只报告不安装
 - **B 仓自举**：`.git/hooks/pre-push` 已装（薄壳三段：ocp 优先/bun 回退/双缺警告 exit 0）；首次真实 push 于 Story 3 收尾
 - **glob 转义坑（两 Builder 各自踩中）**：转义字符类 `[.*+?^${}()|[\]\\] 自身含 *`，朴素替换链会把 `**` 拆坏——NUL 占位法 / split 法两解均实证稳健（17 边界 × 3 实现）
+
+### Story 4a/4c —— 内容分层清理（2026-09-18 DONE，质量门 98/100）
+
+- **全局层建立**：`~/.config/opencode/AGENTS.md`（原 `~/doc/AGENTS.md` 十二节用户规则升格，doc 瘦身为纯天枢项目记忆）；**全局层此前不存在**——用户规则被困 doc 层，非 doc 会话零用户规则
+- **B 仓净化**：口径钉死（`git ls-files` 排除 `.specpipe/`/`bun.lock`，项目词+用户选择词双模式，大小写敏感）——五件文档占位化、agents 模型举例中性化（**保留「用户决策位」关键词**——doctor 占位识别与 agents-permission 测试依赖）、tests 夹具中性化（断言同步+先长后短防前缀吞噬）
+- **BOOTSTRAP** 过渡期安装节（v1 skill 恢复）→ `ocp init` 路径
+- **审查链 5 轮**（spec REJECT/REJECT/PASS + impl REJECT/PASS）：checker 实跑口径扫描验证"净化后零残留机械可达"；抓出 impl 的归档时序死锁（预门归档必非 DONE → 反触发 pre-push 硬拒——D5 修正为 DONE 后归档）
+- **自举趣事**：line-budget 对本 Story 自己的 spec 审查报告执法（43 行 > 30 上限）——压缩至 27 行（点位清单复述改引用 spec）
+- **档案分居模式**：会话 cwd≠B 仓根时插件 wfRoot 锚 cwd（.stage 在 doc 工作区）——DONE 后归档 B 仓闭环（pre-push 校验 B 仓 repoRoot 下档案）
 
 ## 环境注意事项
 

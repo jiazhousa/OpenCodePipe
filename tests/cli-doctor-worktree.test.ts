@@ -362,7 +362,7 @@ describe("checkModelRouting 模型路由建议（2026-09-18 用户策略）", ()
     const r = await checkModelRouting(globalPath, projectPath, [agentsDir]);
     expect(r.level).toBe("WARN");
     expect(r.message).toContain("oracle=gw/model-a");
-    expect(r.message).not.toContain("builder"); // builder 是 flash 不同 modelId，不进冲突清单
+    expect(r.message).not.toContain("builder"); // builder 是 model-a-mini 不同 modelId，不进冲突清单
   });
 
   test("checker 跨家族 → PASS", async () => {
