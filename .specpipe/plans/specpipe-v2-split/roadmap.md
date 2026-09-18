@@ -96,6 +96,8 @@
 | L4 | B 仓自举 hook 为手工变体（与 init 模板三处文本差异，行为等价） | S3 质量门备查 | 可择机统一为 init 生成物 |
 | L5 | doctor vendored 检查与 transition-consistency ① 层语义重叠（块A 等价自实现） | S3 块A 发现项 | 行为一致，重构复用可选 |
 | L6 | 本机会话工作流档案 .stage 手写时代无 history 留痕（pre-push 存量豁免覆盖） | S2 前历史事实 | 无需补；S4 起新 topic 走 stage_set 插件留痕 |
+| L7 | agents 环境值手工适配易漂移（纯净源演进后部署实例需人肉 diff 合并：白名单命令/规则库路径等环境值与源变更混在同文件） | 2026-09-18 第二台机器部署发现（review-rules-intake / ocp-link-cli 两 Issue 佐证） | Story 级候选：doctor 加 agents-deployment 占位感知 diff 检查项，或 `ocp agents deploy` 子命令（复制+环境值三路合并）；可并入 S5「配置↔部署一致性」主题 |
+| L8 | 跨仓调度模式未定义——会话目录外项目的工作流操作：stage 工具无目标目录参数（绑定会话目录本身是正确设计与安全边界），A 仓规章无跨仓档案落位约定 | 2026-09-18 workbench 会话管理 B 仓 Issue 实测（stage_set 写至会话根，手工搬运修正） | 定性=体系缺口而非插件缺陷；根治候选：①规章先行——A 仓补跨仓约定（档案落被操作仓+手工留痕 JSONL 格式正化）②工具参数化——stage 工具加可选目录参数（须配套权限边界，如仅限 external_directory 白名单）；建议并入 S5 或独立 Story |
 
 ## 体系全景
 
