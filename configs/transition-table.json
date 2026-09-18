@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "1ecfe8dd9b21004b51b93b58dea7b71d40485ce9",
+  "source": "88184c29680e1f0b3dfaf64ab5b2165eeb1a21c5",
   "states": [
     { "name": "EPIC_SPEC_DRAFT", "path": "epic", "initial": true },
     { "name": "EPIC_SPEC_REVIEWING", "path": "epic" },
@@ -76,7 +76,7 @@
   },
   "vendor": {
     "repo": "https://github.com/jiazhousa/SpecPipe",
-    "commit": "1ecfe8dd9b21004b51b93b58dea7b71d40485ce9",
+    "commit": "88184c29680e1f0b3dfaf64ab5b2165eeb1a21c5",
     "files": {
       "07-state-machine.md": "a29e809d9307876f12d4bc47c84dc48c211e0bf12275ccd0fdaa91c4b6490073",
       "templates/epic-spec-template.md": "2de553a22adcc0b6ef218219bfed530f53b15982676a5e12efc4c0fac50b2218",
@@ -87,7 +87,7 @@
       "templates/review-issue-impl-template.md": "57fcf37e9f5f537c052455146086f88248e9cbdf997db16933b61d6a71a63062",
       "templates/review-quality-gate-template.md": "43f715f6ad88c5aaf14d732977d5e9a0b2f348a75d0847f9d8aa98a7d2cdccdd",
       "templates/review-spec-template.md": "cb600eede6949531730c3d4f54a0f61fcc0b160bc98ce0f07eb875b9849c6140",
-      "templates/spec-template.md": "64f0763efd08b86b5d6cb613b49047bc31ce850b863f83c2e600519fad8591a6"
+      "templates/spec-template.md": "19edb079d00c09bc97258385801057e2ddbda5e992c1a5d380cd4dcb13a964ac"
     }
   }
 }
