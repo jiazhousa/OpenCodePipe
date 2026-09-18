@@ -23,7 +23,7 @@
 | S1 | A 仓规章 v1 | ✅ DONE | M1 规章冻结 |
 | S2 | B 仓核心（4 部件：骨架 / 转移表数据 / stage 插件 / agents） | ✅ DONE（2026-09-17，质量门 94/100 + fence 三步全绿；插件 file:// 挂载实证、五角色迁移保真 diff） | M2 前半 |
 | S3 | B 仓 CLI（5 部件：init / doctor / worktree / pre-push / check-tools） | ✅ DONE（2026-09-17，质量门 98/100 + fence 四步全绿；pre-push 真机四情形验证 + B 仓自举；vendored 基线 1ecfe8dd9b21004b51b93b58dea7b71d40485ce9） | **M2 强制层就绪 ✅** |
-| S4 | 组合验收（4 部件：user-rule / 实跑 / 退役 / Epic 终检） | ⏳ 依赖 S2+S3 | **M3 切换完成 → ALL_DONE** |
+| S4 | 组合验收（4 部件：user-rule / 实跑 / 退役 / Epic 终检） | 🔄 4b 实证达成（2026-09-18 真实需求实跑，见 s4b-live-run-record.md）；剩 4a/4c/4d | **M3 切换完成 → ALL_DONE** |
 | S5 | 四层试点（候选，待立项确认）：变更式 spec + FR 锚点 + Task.yaml 手写 + 校验脚本 + A 仓 v1.1（修订 02/03/06/07 卷） | 🆕 建议 | M4 v3 起点 |
 
 ### 部件级拆分（验收单元）
@@ -52,7 +52,7 @@
 | # | 部件 | 交付物 | 验收要点 |
 |---|---|---|---|
 | 4a | user-rule 成文 | 个人规则按 10-composition 组合接入 | 个人偏好项与仓默认分离清晰（"换人依然成立"测试） |
-| 4b | 集成实跑 | 实跑载体（**待用户确认**，候选 CRM demo Issue 级）+ 全程留痕归档 | pre-push 拦截与放行各验证一次 |
+| 4b | 集成实跑 | ✅ 实证达成（2026-09-18，天枢真实需求"商机分配页联系人列"，载体由真实工作自然充当）| 五检查点全过（留痕/档案/纪律/载体/发布），详见 [s4b-live-run-record.md](s4b-live-run-record.md) |
 | 4c | 旧体系退役 | v1 skill 归档 + 全局 AGENTS.md 指引更新 + BOOTSTRAP.md 过渡期安装节替换为 `ocp init` | 新体系完全接管 |
 | 4d | Epic 终检 | epic-spec 验收标准 6 项逐项核验 | ALL_DONE |
 
@@ -81,7 +81,7 @@
 - [x] push + 合并 Story 1（M1 生效）
 - [x] GitHub 创建 OpenCodePipe 仓
 - [x] 凭证落盘（~/.env；2026-09-17 已轮换）
-- [ ] Story 4 实跑载体确认（候选：CRM demo `~/doc/learn/topic06-agent-pattern-selection` Issue 级 / `~/project/mini-crm-elastic` / 手头真实小项目）——**2026-09-17 用户暂缓，启动 S4 前需回定或裁决跳过（4b 单独补验）**
+- [x] Story 4 实跑载体确认——无需再定：2026-09-18 真实需求（商机分配页联系人列）自然充当载体，4b 验收达成
 - [ ] Story 5 立项确认（写入 epic-spec 路线图节）
 - [ ] S4/npm 发布前定 B↔A 版本关联策略（B 仓版本号与 A 仓契约版本显式映射 + doctor 报告锁定版本）——2026-09-17 消费者责任模式风险评估产出
 
