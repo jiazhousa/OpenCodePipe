@@ -13,7 +13,7 @@
 `~/.config/opencode/opencode.json`：
 
 ```json
-{ "plugin": ["file:///home/starlex/project/opencodepipe/src/plugin/index.ts"] }
+{ "plugin": ["file:///home/starlex/project/opencodepipe"] }
 ```
 
 重启 opencode 后，会话中获得两个工作流工具：

@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "type": "module",
   "exports": {
-    "./plugin": "./src/plugin/index.ts"
+    "./plugin": "./src/plugin/index.ts",
+    "./server": "./src/plugin/index.ts"
   },
   "bin": {
     "ocp": "./cli/index.ts"
