@@ -112,7 +112,7 @@ Oracle ──递交审查──→ Checker ──报告+状态落定──→ Or
 
 **质量门全面审查**（S-S9/I-S6 的 `QUALITY_GATE` 状态，checker 一次性执行；LCR 复用其中代码质量 OCR 流水线）：
 1. **实现与 impl 一致性** — 实际改动是否与 impl 文档描述一致
-2. **代码质量（OCR 流水线）** — 规则注入（根据变更文件后缀从 `~/.config/opencode/skills/specpipe/docs/review-rules/` 加载规则文档，映射见 `system_rules.json`，20 个语言规则 + `default.md` 兜底）+ 逐文件审查（死代码、逻辑错误、性能、线程安全等）+ 行级锚定（existing_code 1~3 行 + start_line 行号）+ 事实校验（diff 可证伪的剔除）+ 精度优先（宁缺毋滥）
+2. **代码质量（OCR 流水线）** — 规则注入（根据变更文件后缀从 `<review-rules 目录——用户决策位，示例：~/.config/opencode/review-rules/>` 加载规则文档，映射见 `system_rules.json`，20 个语言规则 + `default.md` 兜底）+ 逐文件审查（死代码、逻辑错误、性能、线程安全等）+ 行级锚定（existing_code 1~3 行 + start_line 行号）+ 事实校验（diff 可证伪的剔除）+ 精度优先（宁缺毋滥）
 3. **commit 信息** — 用 `git log` 检查每个 commit message 简洁清晰、符合项目既有风格
 4. **整体编译** — 在 worktree 执行编译命令（如 `mvn compile`），确认编译通过
 5. **受影响模块测试（fence）** — **必须执行项目的测试围栏脚本（如 `./scripts/run-test-fence.sh`），不得以"无新增测试"为由跳过**。若项目无 fence 脚本，则执行受影响模块的测试（如 `mvn test -pl <模块>`）。fence 结果摘要需附入审查报告
