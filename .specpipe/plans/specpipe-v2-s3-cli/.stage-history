@@ -1,0 +1,1 @@
+{"ts": "2026-09-17T17:54:00+08:00", "topic": "specpipe-v2-s3-cli", "from": "QUALITY_GATE", "to": "DONE", "actor": "调度者", "note": "回补（Epic 终检时补录）：.stage=DONE 先在而 history 缺失；终态依据质量门报告 rev1 PASS 98/100（commit ccb97e4）"}

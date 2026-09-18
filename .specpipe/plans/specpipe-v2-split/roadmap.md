@@ -2,10 +2,10 @@
 
 > 维护于 Epic specpipe-v2-split 档案；Story 状态与 epic-spec.md 同步更新。v3 部分依据 assets/design-four-layer.md（四层工作流设计）。
 
-## 当前状态（2026-09-17 会话收尾）
+## 当前状态（2026-09-18 Epic ALL_DONE）
 
-- **M1 规章冻结 ✅**：A 仓 SpecPipe v1 已合并 main（`2b21dfb → 1ecfe8d`，含三层定位修订），12 文件 1028 行，质量门 92/100
-- **M2 强制层就绪 ✅**（2026-09-17）：S2 核心（骨架/转移表/stage 插件/agents，质量门 94/100）+ S3 CLI（init/doctor/worktree/pre-push/check-tools，质量门 98/100，fence 四步全绿）交付完毕；**B 仓自举 pre-push hook 已投入运行**；vendored 基线 `1ecfe8dd9b21004b51b93b58dea7b71d40485ce9`
+- **M1 ✅ → M2 ✅ → M3 ✅ → Epic ALL_DONE**：S1（92）/S2（94）/S3（98）/S4（98）质量门全 PASS；4d Epic 终检 6 项验收全过（见 epic-final-check.md）——S1/S2/S3 终态档案按质量门证据诚实回补（演化期工具未交付的真实历史，note 注明）
+- **新体系全量上线**：全局层 `~/.config/opencode/AGENTS.md`（十二节升格）+ agents 五件 + 插件目录挂载 + ocp CLI + 自举 pre-push；v1 skill 退役归档
 - 凭证：`~/.env`（GH_TOKEN）+ `~/.git-credentials`（git 自动认证）；2026-09-17 token 已轮换，冗余条目清理为单行
 - 开发模式（2026-09-17 用户拍板）：A/B 两仓日常迭代**直接提交 main**（个人仓，免分支/PR 开销）；10-composition 的 Git 分支策略面向使用方项目，不约束本体系两仓自身
 
@@ -13,17 +13,17 @@
 
 1. **会话起点**：在 B 仓根（`~/project/opencodepipe`）启动 opencode——档案纪律与 checker 跨 worktree 权限问题的根治方案
 2. **质量基线**：`bun run fence`（四步：typecheck/test/smoke/consistency）；`bun cli/index.ts --help` 看命令
-3. **下一步主线**：S4 组合验收（4a user-rule 成文 / 4b 实跑【载体暂缓待定】/ 4c 旧体系退役 / 4d Epic 终检）——启动前需用户确认 4b 载体或裁决跳过
+3. **下一步主线**：Epic 已收官——候选=S5 四层试点（见下表，待立项确认）/ 遗留台账拾起 / 或休战
 4. **挂起决策**：见下方「用户动作清单」
 
-## v2 拆分（Epic specpipe-v2-split，进行中）
+## v2 拆分（Epic specpipe-v2-split，✅ ALL_DONE 2026-09-18）
 
 | Story | 内容 | 状态 | 里程碑 |
 |---|---|---|---|
 | S1 | A 仓规章 v1 | ✅ DONE | M1 规章冻结 |
 | S2 | B 仓核心（4 部件：骨架 / 转移表数据 / stage 插件 / agents） | ✅ DONE（2026-09-17，质量门 94/100 + fence 三步全绿；插件 file:// 挂载实证、五角色迁移保真 diff） | M2 前半 |
 | S3 | B 仓 CLI（5 部件：init / doctor / worktree / pre-push / check-tools） | ✅ DONE（2026-09-17，质量门 98/100 + fence 四步全绿；pre-push 真机四情形验证 + B 仓自举；vendored 基线 1ecfe8dd9b21004b51b93b58dea7b71d40485ce9） | **M2 强制层就绪 ✅** |
-| S4 | 组合验收（4 部件：user-rule / 实跑 / 退役 / Epic 终检） | 🔄 4b ✅（真实需求实跑）/ 4a+4c ✅（2026-09-18 内容分层 Story：全局层建立+十二节升格、B 仓净化、BOOTSTRAP 替换 ocp init——**4c"全局 AGENTS.md 指引更新"子项落点=该 Story 全局层建立**，全局层内容为用户规则不含工作流指引）；剩 4d Epic 终检 | **M3 切换完成 → ALL_DONE** |
+| S4 | 组合验收（4 部件：user-rule / 实跑 / 退役 / Epic 终检） | ✅ DONE（4a/4c：内容分层 Story 98/100 + 全局层建立；4b：真实需求实跑 12 条流水 + 6 MR；4d：Epic 终检 6 项全过 2026-09-18，S1/S2/S3 终态档案诚实回补） | **M3 切换完成 ✅ → Epic ALL_DONE ✅** |
 | S5 | 四层试点（候选，待立项确认）：变更式 spec + FR 锚点 + Task.yaml 手写 + 校验脚本 + A 仓 v1.1（修订 02/03/06/07 卷） | 🆕 建议 | M4 v3 起点 |
 
 ### 部件级拆分（验收单元）

@@ -67,17 +67,17 @@ v2 拆分为两个独立仓库：
 - 审查基准：01~10 全部卷中源自 v1 的内容与 v1 SKILL.md 对应内容**语义等价**（提炼重组而非重设计；README 定位段与 templates 结构重组除外）；v1 关键规则 15 条逐条落位（第 15 条 LCR 废弃）
 - 里程碑角色：**M1 规章冻结**——Story 1 用户放行后，A 仓 v1 即为 B 仓的 spec 基线
 
-### Story 2: B 仓核心（骨架 + 插件 + agent 定义）
+### Story 2: B 仓核心（骨架 + 插件 + agent 定义）✅
 - 优先级 P0 / 依赖 Story 1（07-state-machine 契约）/ 预估 4-5 天
 - 范围：repo 骨架（TS 工程 / 测试 / fence，**CI 暂缓——用户裁决 2026-09-17，待 S3 或 npm 发布前补建**，**预留 cli 与 check-tools 的 bin 槽位、目录，消除与 Story 3 的骨架文件冲突**）、plugin（`stage_get` / `stage_set`：转移合法性校验 + `.stage-history` 留痕，转移表以数据文件加载）、agents/（五角色定义迁移 + 权限白名单：Checker edit 路径白名单、Explorer bash 只读白名单）、单测（转移表全路径覆盖 / 非法转移拒绝 / history 格式 / 权限生效）
 - S0 前置调研：opencode plugin/tool 注册 API 现状与版本锁定
 
-### Story 3: B 仓 CLI 工具族（git 管控强制化）
+### Story 3: B 仓 CLI 工具族（git 管控强制化）✅
 - 优先级 P1 / 依赖 Story 2 骨架完成（骨架已预留 cli / check-tools 槽位；此后填充物文件集与 Story 2 不相交，可与 Story 2 收尾并行）
 - 范围：cli（`ocp init` 铺设 {wf}/ 目录 + 模板 + fence 脚本模板 + hook 安装；`ocp doctor` 环境自检；`ocp worktree` 创建封装 + 分支命名校验）、pre-push hook、check-tools（whitespace / 行数上限 / commit 格式 / 转移表一致性校验 / **A 仓平台词扫描**）、单测
 - 验收含：pre-push 真实拦截一次未过质量门的 push（留证据）
 
-### Story 4: 组合验收 + 退役切换
+### Story 4: 组合验收 + 退役切换 ✅（4a/4b/4c 达成 + 4d Epic 终检，实跑载体由 CRM demo 调整为天枢真实需求——见 s4b-live-run-record.md）
 - 优先级 P0 / 依赖 Story 2 + 3 / 预估 2-3 天
 - 范围：user-rule 抽取成文（按 10-composition 组合接入）、新体系集成实跑（载体与规模待 S1-S3 完成后单独确定，当前候选 CRM demo Issue 级；留痕归档）、旧 specpipe skill 退役归档、AGENTS.md 指引更新、Epic 终检
 - 定性：切换门槛（集成验收），非表演性自举——仓内内容保持泛化，不为举证造内容

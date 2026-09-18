@@ -1,0 +1,1 @@
+{"ts": "2026-09-17T14:44:00+08:00", "topic": "specpipe-v2-s2-core", "from": "QUALITY_GATE", "to": "DONE", "actor": "调度者", "note": "回补（Epic 终检时补录）：S2 开发期插件在途，无过程流水为真实历史；终态依据质量门报告 rev1 PASS 94/100（commit cf97501）"}

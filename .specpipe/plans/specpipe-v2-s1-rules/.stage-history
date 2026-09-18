@@ -1,0 +1,1 @@
+{"ts": "2026-09-16T23:12:00+08:00", "topic": "specpipe-v2-s1-rules", "from": "QUALITY_GATE", "to": "DONE", "actor": "调度者", "note": "回补（Epic 终检时补录）：S1 时期状态机插件未交付（S2 交付），无过程流水为真实历史；终态依据质量门报告 rev1 PASS 92/100（commit 1703e6f）"}
