@@ -111,6 +111,8 @@ user-rule（个人规则+用户环境声明：模型/检索命令等用户决策
 旧体系 v1（本地 skill）🔄 运行中 ── S4 退役归档 ──→ 新体系 A+B 完全接管
 ```
 
-## 档案权威说明（2026-09-16 追加）
+## 档案权威说明（2026-09-16 追加；2026-09-18 裁剪盘点后补保留定性）
 
 本 Epic 工作流档案权威位置已迁至 **B 仓 `.specpipe/`**（随 git 跨机同步）。workbench 本机 `.specpipe/plans/specpipe-v2-*` 为历史副本，不再更新；后续 Story（S2 起）的档案直接产生于 B 仓目录（在 B 仓根启动 opencode 会话）。新机器环境引导见 B 仓 `docs/BOOTSTRAP.md`。
+
+**档案保留定性（2026-09-18 用户裁定）**：`reviews/` 全部审查报告与 `plans/` 各 topic 过程档案为 **OpenCodePipe 走 SpecPipe 的自举实录**（非表演性自举的证据链），**永久保留、不做清理**——包括 Epic DONE 后亦不迁移不删除；后续 Story 档案同规。精简对象仅限本地产物（test-fence-reports 等非 git 内容）。
