@@ -23,7 +23,7 @@ B 仓 `agents/` 是**纯净定义源**——只含角色稳定内容（职责、
 |---|---|---|
 | **stage 状态机插件** | `opencode.json` → `"plugin": ["file:///home/starlex/project/opencodepipe/src/plugin/index.ts"]` | 一次（全局） |
 | **agents 五角色** | 本指南：复制 + 填值 → `~/.config/opencode/agents/` | 一次（全局） |
-| **CLI / pre-push** | 在使用项目里 `bun ~/project/opencodepipe/cli/index.ts init`（铺 `{wf}/` 目录七件，`--hook` 加装 pre-push） | 每项目 |
+| **CLI / pre-push** | 一次性装短命令：`ln -s <B仓>/cli/index.ts ~/.local/bin/ocp`（shebang `#!/usr/bin/env bun` 直执行）；此后每项目由 oracle 自动 `ocp doctor` + `ocp init` 铺设，无需手动 | 一次装命令；每项目自动 |
 
 ## 三、接管五步
 
