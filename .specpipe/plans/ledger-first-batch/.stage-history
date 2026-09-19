@@ -1,1 +1,5 @@
 {"ts":"2026-09-18T23:55:00+08:00","topic":"ledger-first-batch","from":"ISSUE_IMPL_DRAFT","to":"ISSUE_IMPL_REVIEWING","actor":"调度者","note":"跨仓手工落定（L8绕法）"}
+{"ts":"2026-09-19T00:12:00+08:00","topic":"ledger-first-batch","from":"ISSUE_IMPL_REVIEWING","to":"ISSUE_IMPL_APPROVED","actor":"审查者","note":"用户口头授权推送视为review PASS（先推后审余量保留）"}
+{"ts":"2026-09-19T00:12:10+08:00","topic":"ledger-first-batch","from":"ISSUE_IMPL_APPROVED","to":"WORKING","actor":"调度者"}
+{"ts":"2026-09-19T00:12:20+08:00","topic":"ledger-first-batch","from":"WORKING","to":"QUALITY_GATE","actor":"调度者"}
+{"ts":"2026-09-19T00:12:30+08:00","topic":"ledger-first-batch","from":"QUALITY_GATE","to":"DONE","actor":"调度者","note":"质量门依据：typecheck+130测试全过+check全绿；首推被pre-push拦截（REVIEWING非DONE）自举实证"}
