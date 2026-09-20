@@ -2,7 +2,7 @@
 // 配置二级查找：项目级 {wf}/doctor-config.json（ocp init 生成模板）→ 用户级 ~/.config/opencodepipe/doctor.json，
 // 项目级优先，均无 → 相关项 WARN「未声明」。
 // 探测函数全部接受注入参数（假配置/假目录/假探测函数），支持函数级断言；CLI 层默认注入真实环境。
-import { existsSync, readdirSync, readlinkSync, realpathSync } from "node:fs";
+import { existsSync, readdirSync, readlinkSync, realpathSync, statSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
@@ -123,7 +123,9 @@ async function readPluginConfig(path: string): Promise<unknown> {
   return record.plugin ?? record.plugins;
 }
 
-/** V2 约定目录挂载判定：{项目根}/.opencode/plugins/ 下条目（symlink 按 realpath 解析；断链按 readlink 目标判）指向 B 仓插件即命中——2.x 唯一可靠发现路径（实验实证，见 plans/ocp-plugin-dual-compat） */
+/** V2 约定目录挂载判定：{项目根}/.opencode/plugins/ 下条目指向 B 仓插件即命中——2.x 唯一可靠发现路径（实验实证，见 plans/ocp-plugin-dual-compat）。
+ *  判据（大小写不敏感，克隆目录名形态不限）：目标路径含 `opencodepipe` 且（含 `src/plugin`（单文件链接）或目标为目录（直链 B 仓根））；
+ *  symlink 按 realpath 解析，断链按 readlink 目标字面判（无法 stat 目录形态，仅路径判）。 */
 function v2ConventionMounted(projectRoot: string): boolean {
   const dir = join(projectRoot, ".opencode", "plugins");
   if (!existsSync(dir)) return false;
@@ -131,14 +133,24 @@ function v2ConventionMounted(projectRoot: string): boolean {
     const entries = readdirSync(dir);
     return entries.some((name) => {
       const entryPath = join(dir, name);
+      const hit = (target: string, statIsDir: boolean | undefined) => {
+        const lower = target.toLowerCase();
+        return lower.includes("opencodepipe") && (lower.includes("src/plugin") || statIsDir === true);
+      };
       try {
         const real = realpathSync(entryPath);
-        return real.includes("opencodepipe") && real.includes("src/plugin");
+        let statIsDir: boolean | undefined;
+        try {
+          statIsDir = statSync(real).isDirectory();
+        } catch {
+          statIsDir = undefined;
+        }
+        return hit(real, statIsDir);
       } catch {
-        // 断链 symlink 无法 realpath：按 readlink 目标字面判
+        // 断链 symlink 无法 realpath：按 readlink 目标字面判（目录形态不可知，仅单文件路径判）
         try {
           const target = readlinkSync(entryPath);
-          return target.includes("opencodepipe") || target.includes("src/plugin");
+          return hit(target, false);
         } catch {
           return false;
         }

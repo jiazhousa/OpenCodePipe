@@ -1,2 +1,3 @@
 {"ts": "2026-09-20T14:51:14+08:00", "topic": "ocp-plugin-dual-compat", "from": null, "to": "ISSUE_IMPL_DRAFT", "actor": "调度者", "trigger": "建档（OpenCode V2 发布，插件双版本兼容改造）"}
 {"ts": "2026-09-20T14:51:14+08:00", "topic": "ocp-plugin-dual-compat", "from": "ISSUE_IMPL_DRAFT", "to": "ISSUE_IMPL_REVIEWING", "actor": "调度者", "trigger": "编码完成（双形状入口+doctor 双轨+smoke 双链路+文档），fence 四步全绿，实机 1.18.31+2.0.10 双版本验证通过"}
+{"ts": "2026-09-20T14:55:54+08:00", "topic": "ocp-plugin-dual-compat", "from": "ISSUE_IMPL_REVIEWING", "to": "ISSUE_IMPL_DRAFT", "actor": "审查者", "trigger": "Issue Impl审查REJECT（doctor V2 约定目录判定大小写假阴性 + AGENTS.md 未同步，报告 ocp-plugin-dual-compat-impl-revision-1.md）"}

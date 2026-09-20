@@ -129,6 +129,33 @@ describe("checkPlugin", () => {
   test("V2 约定目录 .opencode/plugins/ symlink 指向 B 仓插件 → PASS（2.x 唯一可靠发现路径）", async () => {
     const projectRoot = await mkdtemp(join(tmpdir(), "ocp-dr-v2-"));
     try {
+      // 真实目标（覆盖 realpath 成功分支）+ 大写目录名（克隆形态不限，判据大小写不敏感）
+      const fakeRepo = await mkdtemp(join(tmpdir(), "OpenCodePipe-"));
+      const pluginDir = join(fakeRepo, "src", "plugin");
+      await mkdir(pluginDir, { recursive: true });
+      const entry = join(pluginDir, "index.ts");
+      await writeFile(entry, "// fake\n");
+      const pluginsDir = join(projectRoot, ".opencode", "plugins");
+      await mkdir(pluginsDir, { recursive: true });
+      await symlink(entry, join(pluginsDir, "ocp-stage.ts"));
+      const result = await checkPlugin(join(base, "absent.json"), join(projectRoot, "opencode.json"));
+      expect(result.level).toBe("PASS");
+      expect(result.message).toContain("V2约定目录");
+
+      // 直链 B 仓根目录（目标为目录，不含 src/plugin 字面）同样命中
+      await rm(join(pluginsDir, "ocp-stage.ts"), { force: true });
+      await symlink(fakeRepo, join(pluginsDir, "ocp-repo-dir"));
+      const resultDir = await checkPlugin(join(base, "absent.json"), join(projectRoot, "opencode.json"));
+      expect(resultDir.level).toBe("PASS");
+      expect(resultDir.message).toContain("V2约定目录");
+    } finally {
+      await rm(projectRoot, { recursive: true, force: true });
+    }
+  });
+
+  test("V2 约定目录断链 symlink 目标指向 B 仓路径（小写字面）→ PASS（readlink fallback）", async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), "ocp-dr-v2b-"));
+    try {
       const pluginsDir = join(projectRoot, ".opencode", "plugins");
       await mkdir(pluginsDir, { recursive: true });
       await symlink("/x/opencodepipe/src/plugin/index.ts", join(pluginsDir, "ocp-stage.ts"));
