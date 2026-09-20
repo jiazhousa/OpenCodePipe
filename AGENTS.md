@@ -39,6 +39,16 @@
 - **自举趣事**：line-budget 对本 Story 自己的 spec 审查报告执法（43 行 > 30 上限）——压缩至 27 行（点位清单复述改引用 spec）
 - **档案分居模式**：会话 cwd≠B 仓根时插件 wfRoot 锚 cwd（.stage 在 doc 工作区）——DONE 后归档 B 仓闭环（pre-push 校验 B 仓 repoRoot 下档案）
 
+### Issue ocp-plugin-dual-compat —— OpenCode V2 插件兼容（2026-09-20 DONE，质量门 98/100）
+
+- **背景**：OpenCode V2 发布（2.0.10 beta，npm `@opencode/cli-*` 渠道），插件 API 全面重写（官方 breaking：V1 实现不在 V2 运行）；用户要求双兼容 1.18.x+2.x（不可则优先 2.x）——实证后双兼容成立
+- **插件双形状**：`src/plugin/index.ts` default export `{id, setup, server}`（V1 调 server()/V2 调 setup()，手写形状零运行时依赖 `@opencode/plugin`——1.18 宿主无此包；**禁止 named 运行时导出**约束延续）；setup 形态防御（1.18.31 误调传非 V2 ctx 静默跳过）；stage-ops 核心零改动；V2 目录锚 `ctx.location.directory`（多 workspace 待正式版复核）
+- **V2 挂载实证**（完整矩阵见 plans/ocp-plugin-dual-compat/experiment-record.md）：**配置式 plugin/plugins 键 2.0.10 全不生效（beta 缺陷），唯一可靠 = `.opencode/plugins/` 约定目录**（symlink 单文件/目录/转发壳均可）；陷阱：`opencode plugin list` 不触发加载不可作判据；V2 共享后台服务持有启动时配置（改配置须杀服务或 `--standalone`）
+- **doctor 双轨**：checkPlugin 认 V1 配置键（plugin 优先 plugins 兜底，对象 {package} 前瞻）+ V2 约定目录（realpath/readlink 断链兜底，大小写不敏感，单文件 src/plugin 或目录直链均命中）；文案「全局·配置 / 项目·V2约定目录」
+- **devDep**：`@opencode/plugin 2.0.*`（V2 类型线）与 `@opencode-ai/plugin 1.18.*` 并存，均零运行时依赖
+- **审查链**：impl REJECT 86（doctor 大小写假阴性+AGENTS.md 未同步）→ PASS 98 → 质量门 98；带病 commit 裁决不 rebase（审计链+教训保留，详见质量门报告）
+- **教训**：① 验证命令禁用 `| tail` 吞退出码（曾致类型错误带病提交）；② pkill -f 模式会匹配 shell 自身命令行致会话自杀（`[o]pencode` 技巧）；③ 实验观测指标先证有效性再上矩阵（plugin list 误判返工一轮）
+
 ## 环境注意事项
 
 - **checker subagent 跨 worktree 落盘**：会话工作区不在 B 仓根时，edit/write 对 B 仓路径的权限匹配存在已知问题（绝对模式 allow 不生效），checker 经 bash python3 通道落盘可行——根治方案 = 从 B 仓根启动会话（roadmap 档案约定）

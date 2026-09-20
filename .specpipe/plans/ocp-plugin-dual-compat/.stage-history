@@ -5,3 +5,4 @@
 {"ts": "2026-09-20T15:00:53+08:00", "topic": "ocp-plugin-dual-compat", "from": "ISSUE_IMPL_REVIEWING", "to": "ISSUE_IMPL_APPROVED", "actor": "审查者", "trigger": "Issue Impl复审PASS（rev2：rev1 四项全闭环+134 用例 fence 四步全绿，报告 ocp-plugin-dual-compat-impl-revision-2.md）"}
 {"ts": "2026-09-20T15:02:31+08:00", "topic": "ocp-plugin-dual-compat", "from": "ISSUE_IMPL_APPROVED", "to": "WORKING", "actor": "调度者", "trigger": "复审 PASS 98/100，残留 low（测试临时目录清理）已修"}
 {"ts": "2026-09-20T15:02:31+08:00", "topic": "ocp-plugin-dual-compat", "from": "WORKING", "to": "QUALITY_GATE", "actor": "调度者", "trigger": "编码完成，fence 全绿，递交质量门"}
+{"ts": "2026-09-20T15:09:21+08:00", "topic": "ocp-plugin-dual-compat", "from": "QUALITY_GATE", "to": "DONE", "actor": "调度者", "trigger": "质量门PASS"}
