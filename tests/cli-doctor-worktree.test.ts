@@ -128,9 +128,9 @@ describe("checkPlugin", () => {
 
   test("V2 约定目录 .opencode/plugins/ symlink 指向 B 仓插件 → PASS（2.x 唯一可靠发现路径）", async () => {
     const projectRoot = await mkdtemp(join(tmpdir(), "ocp-dr-v2-"));
+    // 真实目标（覆盖 realpath 成功分支）+ 大写目录名（克隆形态不限，判据大小写不敏感）；声明于 try 外供 finally 清理
+    const fakeRepo = await mkdtemp(join(tmpdir(), "OpenCodePipe-"));
     try {
-      // 真实目标（覆盖 realpath 成功分支）+ 大写目录名（克隆形态不限，判据大小写不敏感）
-      const fakeRepo = await mkdtemp(join(tmpdir(), "OpenCodePipe-"));
       const pluginDir = join(fakeRepo, "src", "plugin");
       await mkdir(pluginDir, { recursive: true });
       const entry = join(pluginDir, "index.ts");
