@@ -71,3 +71,20 @@ ln -s <B仓>/src/plugin/index.ts ~/.config/opencode/plugins/ocp-stage.ts
 ```
 
 **升级评估更新**：stage 全局挂载障碍 ✅ 解除（且 per-location 语义优于 V1）；剩余预检项=provider（zhipuai CodingPlan）V2 路由实证 + agents 五件 V2 识别实证 + V1 会话历史不迁移（备份 `~/.opencode/bin/opencode` 可回退）+ LSP 缺失（fence 兜底，影响有限）。
+
+## 追加实验（2026-09-20 晚）：升级预检全清——provider/credential/agent 路由
+
+模拟升级环境（生产 V1 db 拷贝 + agents 五件 + auth.json + V2 binary）逐层实证：
+
+| 层 | 结论 |
+|---|---|
+| 会话自动迁移 | ✅ V2 打开同路径 db 自动跑迁移链（migration 表留痕）：session_v2 751 行真实历史会话 + session_message 30333 行；V1 session 表 3822 行保留（空壳/系统会话被过滤） |
+| credential | ⚠️ V1 auth.json（文件）→ V2 db credential 表**不自动迁移**；解法=API key 内联进 providers 段 settings.apiKey（auth 体系可绕开） |
+| provider 目录 | ✅ models.dev 统一后台含 zhipuai-coding-plan（用户判断正确，非白名单丢失）；V2 自定义 providers 段形态：`{package: "aisdk:@ai-sdk/openai-compatible", settings: {baseURL, apiKey}, models: {glm-5.3: {...}}}`——**models 声明必填**（目录化设计不自动拉列表），baseURL=https://open.bigmodel.cn/api/coding/paas/v4 |
+| agent 加载 | ✅ 五件全被发现（debug agents 命令验证），frontmatter V1 分离形态自动翻译（model+variant 解析正确） |
+| **agent 会话路由** | ✅ **破案：V2 run 会话按顶层 config.model 选模型，agent.model 不生效**（V1 是 agent.model 优先）——顶层默认未配时落 jev free（且该免费模型时好时坏 500，曾致误判）；解法=全局配置加 `"model": "zhipuai-coding-plan/glm-5.3"`；`-m provider/model[#variant]` 直连两种形态均通 |
+| 验证方法教训 | 三分法定位：①`debug agents`（定义/解析层）②`-m` 直连（provider/凭证层）③`--agent` 全链路——三层分开测才能定位到会话模型选择逻辑；replace 前必须 cat 实际形态（两次静默失败教训） |
+
+**遗留待升级后真机确认**：subagent（task 派发）模型路由是否按各自 agent.model（影响 checker 走 deepseek 的成本分化）或同样落 config.model；TUI 交互会话模型选择行为。
+
+**升级 checklist（终版）**：① 备份 V1 binary + opencode.db ② 安装 V2（opencode.ai/v2/install）③ providers 段（zhipuai + deepseek，key 从 auth.json 抄，models 声明齐）④ 顶层 model 默认 ⑤ `~/.config/opencode/plugins/` symlink stage 插件 ⑥ 首次会话验证：agents 五件路由 + subagent 模型分化 + stage 工具 ⑦ OpenCodeQuota 适配（待定位）
