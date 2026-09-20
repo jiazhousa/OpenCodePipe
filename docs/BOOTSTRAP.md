@@ -7,7 +7,11 @@
 ## 1. 恢复工作流引擎（新体系，2026-09-18 起替代 v1 skill 过渡方案）
 
 ```bash
-# ① 挂载插件：opencode.json 的 plugin 数组 → "file:///<B仓本地路径>"（目录形态）
+# ① 挂载插件（按宿主版本二选一或并存，双形状入口同文件通吃）：
+#    V1（1.18.x，需 ≥1.18.29）：opencode.json 的 plugin 数组 → "file:///<B仓本地路径>"（目录形态）
+#    V2（2.x，2.0.10 实证配置式不生效、唯一可靠路径为约定目录）：
+#      mkdir -p <使用项目>/.opencode/plugins
+#      ln -s <B仓>/src/plugin/index.ts <使用项目>/.opencode/plugins/ocp-stage.ts
 # ② 接入五角色：复制本仓 agents/ 五件至 ~/.config/opencode/agents/ 并填环境值
 #    ——完整步骤与 example 见 docs/agents-adoption.md（零模型配置即可跑，checker 建议跨家族）
 # ②b 复制 checker 规则库：cp -r <B仓>/configs/review-rules ~/.config/opencode/review-rules
@@ -15,7 +19,9 @@
 # ④ 在使用项目里：ocp init（铺设 {wf}/ 七件；--hook 可选装 pre-push）
 ```
 
-> 环境自检：`ocp doctor`（插件挂载/agents 五件/模型路由建议/检索通道/vendored 一致性）。v1 skill 已退役（历史存档不含于本仓）。
+> 环境自检：`ocp doctor`（插件挂载——V1 配置式与 V2 约定目录双轨识别 / agents 五件 / 模型路由建议 / 检索通道 / vendored 一致性）。v1 skill 已退役（历史存档不含于本仓）。
+>
+> **OpenCode 版本兼容**（详见 `.specpipe/plans/ocp-plugin-dual-compat/`）：插件入口为双形状（V1 调 `server()` / V2 调 `setup()`），1.18.31 与 2.0.10 双版本实机验证通过。V2 安装：`curl -fsSL https://opencode.ai/v2/install | bash`（与 V1 同命令不并存，替换式升级）；V2 注意事项：共享后台服务持有启动时配置（改配置后重启服务或 `--standalone`）、`opencode plugin list` 不反映配置/约定目录插件加载状态（以 `ocp doctor` 为准）。
 
 ## 2. 克隆本仓（工作流档案随仓走）
 

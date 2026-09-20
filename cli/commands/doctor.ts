@@ -2,10 +2,10 @@
 // 配置二级查找：项目级 {wf}/doctor-config.json（ocp init 生成模板）→ 用户级 ~/.config/opencodepipe/doctor.json，
 // 项目级优先，均无 → 相关项 WARN「未声明」。
 // 探测函数全部接受注入参数（假配置/假目录/假探测函数），支持函数级断言；CLI 层默认注入真实环境。
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync, readlinkSync, realpathSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { brepoRoot } from "../brepo-root";
 import { checkVendorHashes, type TableFile } from "../../check-tools/transition-consistency";
 
@@ -99,26 +99,59 @@ export function checkOpencode(probe: Probe = (cmd) => Bun.which(cmd)): CheckResu
   return { name: "opencode", level: "PASS", message: `可用（${path}）` };
 }
 
-/** plugin 段命中判定：opencode 挂载形态为 "plugin": ["file:///…/src/plugin/index.ts"]（S2 实证）；元素可为字符串或 [路径, 选项] 元组 */
+/** plugin 段命中判定：V1 挂载形态为 "plugin": ["file:///…/src/plugin/index.ts"]（S2 实证）；元素可为字符串或 [路径, 选项] 元组；V2 正式版前瞻：plugins 键对象元素 { package } */
 function pluginMounted(plugin: unknown): boolean {
   if (!Array.isArray(plugin)) return false;
   return plugin.some((entry) => {
     const item = Array.isArray(entry) ? entry[0] : entry;
-    return typeof item === "string" && (item.includes("opencodepipe") || item.includes("src/plugin"));
+    if (typeof item === "string") return item.includes("opencodepipe") || item.includes("src/plugin");
+    if (item !== null && typeof item === "object") {
+      const pkg = (item as { package?: unknown }).package;
+      return typeof pkg === "string" && (pkg.includes("opencodepipe") || pkg.includes("src/plugin"));
+    }
+    return false;
   });
 }
 
-/** opencode.json 单级读取：不存在 → null（该级未配置）；解析失败 → 抛出 */
+/** opencode.json 单级读取：不存在 → null（该级未配置）；解析失败 → 抛出；V1 plugin 键优先、V2 plugins 键兜底（2.0.10 beta 配置式不生效，正式版前瞻） */
 async function readPluginConfig(path: string): Promise<unknown> {
   const json: unknown = JSON.parse(await readFile(path, "utf8"));
   if (json === null || typeof json !== "object" || Array.isArray(json)) {
     throw new Error("顶层不是对象");
   }
-  return (json as Record<string, unknown>).plugin;
+  const record = json as Record<string, unknown>;
+  return record.plugin ?? record.plugins;
 }
 
-/** 插件挂载状态：读全局与项目 opencode.json 的 plugin 段，任一级命中即 PASS */
+/** V2 约定目录挂载判定：{项目根}/.opencode/plugins/ 下条目（symlink 按 realpath 解析；断链按 readlink 目标判）指向 B 仓插件即命中——2.x 唯一可靠发现路径（实验实证，见 plans/ocp-plugin-dual-compat） */
+function v2ConventionMounted(projectRoot: string): boolean {
+  const dir = join(projectRoot, ".opencode", "plugins");
+  if (!existsSync(dir)) return false;
+  try {
+    const entries = readdirSync(dir);
+    return entries.some((name) => {
+      const entryPath = join(dir, name);
+      try {
+        const real = realpathSync(entryPath);
+        return real.includes("opencodepipe") && real.includes("src/plugin");
+      } catch {
+        // 断链 symlink 无法 realpath：按 readlink 目标字面判
+        try {
+          const target = readlinkSync(entryPath);
+          return target.includes("opencodepipe") || target.includes("src/plugin");
+        } catch {
+          return false;
+        }
+      }
+    });
+  } catch {
+    return false;
+  }
+}
+
+/** 插件挂载状态：V1 配置键（全局+项目 opencode.json）与 V2 约定目录（项目 .opencode/plugins/）任一命中即 PASS */
 export async function checkPlugin(globalConfigPath: string, projectConfigPath: string): Promise<CheckResult> {
+  const projectRoot = dirname(projectConfigPath);
   const sources: Array<{ scope: string; path: string }> = [
     { scope: "项目", path: projectConfigPath },
     { scope: "全局", path: globalConfigPath },
@@ -129,18 +162,21 @@ export async function checkPlugin(globalConfigPath: string, projectConfigPath: s
     if (!existsSync(source.path)) continue;
     try {
       if (pluginMounted(await readPluginConfig(source.path))) {
-        mounted.push(source.scope);
+        mounted.push(`${source.scope}·配置`);
       }
     } catch (error) {
       errors.push(`${source.path} 解析失败：${error instanceof Error ? error.message : String(error)}`);
     }
   }
+  if (v2ConventionMounted(projectRoot)) {
+    mounted.push("项目·V2约定目录");
+  }
   if (mounted.length > 0) {
     return { name: "opencode-plugin", level: "PASS", message: `已挂载（${mounted.join("+")}）` };
   }
   const detail = [
-    errors.length > 0 ? errors.join("；") : "全局与项目 opencode.json 均未引用 opencodepipe 插件",
-    `挂载形态参考："plugin": ["file:///<B仓>/src/plugin/index.ts"]`,
+    errors.length > 0 ? errors.join("；") : "全局与项目 opencode.json 均未引用 opencodepipe 插件，项目 .opencode/plugins/ 亦无 V2 约定目录挂载",
+    `V1（1.18.x）挂载："plugin": ["file:///<B仓>/src/plugin/index.ts"]；V2（2.x）挂载：ln -s <B仓>/src/plugin/index.ts <项目>/.opencode/plugins/ocp-stage.ts`,
   ];
   return { name: "opencode-plugin", level: "WARN", message: detail.join("；") };
 }

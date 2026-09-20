@@ -2,7 +2,7 @@
 // worktree 分支名三级校验与基准解析纯函数正反用例（不真建 worktree）；附 CLI 路由退出码约定。
 import { describe, expect, test, beforeEach, afterEach } from "bun:test";
 import { createHash } from "node:crypto";
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { main as cliMain } from "../cli/index";
@@ -116,6 +116,42 @@ describe("checkPlugin", () => {
     const result = await checkPlugin(broken, join(base, "absent.json"));
     expect(result.level).toBe("WARN");
     expect(result.message).toContain("解析失败");
+  });
+
+  test("V2 plugins 键对象形态 { package } 命中 → PASS（正式版前瞻）", async () => {
+    const globalPath = join(base, "global-opencode.json");
+    await writeFile(globalPath, JSON.stringify({ plugins: [{ package: "file:///x/opencodepipe/src/plugin/index.ts" }] }));
+    const result = await checkPlugin(globalPath, join(base, "absent.json"));
+    expect(result.level).toBe("PASS");
+    expect(result.message).toContain("全局·配置");
+  });
+
+  test("V2 约定目录 .opencode/plugins/ symlink 指向 B 仓插件 → PASS（2.x 唯一可靠发现路径）", async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), "ocp-dr-v2-"));
+    try {
+      const pluginsDir = join(projectRoot, ".opencode", "plugins");
+      await mkdir(pluginsDir, { recursive: true });
+      await symlink("/x/opencodepipe/src/plugin/index.ts", join(pluginsDir, "ocp-stage.ts"));
+      const result = await checkPlugin(join(base, "absent.json"), join(projectRoot, "opencode.json"));
+      expect(result.level).toBe("PASS");
+      expect(result.message).toContain("V2约定目录");
+    } finally {
+      await rm(projectRoot, { recursive: true, force: true });
+    }
+  });
+
+  test("V2 约定目录存在但 symlink 指向他处 → 不命中（WARN）", async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), "ocp-dr-v2n-"));
+    try {
+      const pluginsDir = join(projectRoot, ".opencode", "plugins");
+      await mkdir(pluginsDir, { recursive: true });
+      await symlink("/x/other-project/entry.ts", join(pluginsDir, "other.ts"));
+      const result = await checkPlugin(join(base, "absent.json"), join(projectRoot, "opencode.json"));
+      expect(result.level).toBe("WARN");
+      expect(result.message).toContain("未引用");
+    } finally {
+      await rm(projectRoot, { recursive: true, force: true });
+    }
   });
 });
 

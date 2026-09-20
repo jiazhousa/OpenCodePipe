@@ -32,7 +32,7 @@ $ ocp init --hook          # 可选：加装 pre-push 薄壳（幂等覆盖）
 $ ocp doctor
 [PASS] git：git version 2.43.0
 [PASS] opencode：可用（~/.opencode/bin/opencode）
-[PASS] opencode-plugin：已挂载（全局）
+[PASS] opencode-plugin：已挂载（全局·配置）  # V1 配置式；或（项目·V2约定目录）——ocp doctor 双轨识别
 [PASS] agents：五文件齐全（全局）
 [PASS] retrieval：主检索：ws（~/.local/bin/ws）；回退检索：exa（...）；库文档：ctx7（...）
 [PASS] vendored：10 件一致（source commit：1ecfe8dd...）；本地 A 仓：<A仓本地路径>（可运行 bun scripts/vendor-sync.ts --path ... 对比同步）
