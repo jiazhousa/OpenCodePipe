@@ -88,3 +88,24 @@ ln -s <B仓>/src/plugin/index.ts ~/.config/opencode/plugins/ocp-stage.ts
 **遗留待升级后真机确认**：subagent（task 派发）模型路由是否按各自 agent.model（影响 checker 走 deepseek 的成本分化）或同样落 config.model；TUI 交互会话模型选择行为。
 
 **升级 checklist（终版）**：① 备份 V1 binary + opencode.db ② 安装 V2（opencode.ai/v2/install）③ providers 段（zhipuai + deepseek，key 从 auth.json 抄，models 声明齐）④ 顶层 model 默认 ⑤ `~/.config/opencode/plugins/` symlink stage 插件 ⑥ 首次会话验证：agents 五件路由 + subagent 模型分化 + stage 工具 ⑦ OpenCodeQuota 适配（待定位）
+
+## 迁移实录（2026-09-20 晚，生产升级完成）
+
+1.18.31 → 2.0.10 生产升级执行全记录（六步全过）：
+
+| 步骤 | 结果 |
+|---|---|
+| ① 配置预置 | providers 段（zhipuai+deepseek，key 内联）+ 顶层 model=glm-5.3（V1 兼容忽略未知键） |
+| ② 插件全局挂载 | `~/.config/opencode/plugins/ocp-stage.ts` → B 仓入口 |
+| ③ 备份 | V1 binary 185MB + db 一致性备份 5.2GB（session 3830 行校验一致） |
+| ④ 安装 | 2.0.11 镜像 404 → 装 2.0.10；替换式，`opencode --version` 确认 |
+| ⑤ 首会话冒烟 | oracle→glm-5.3 路由 ✅；stage_get 工具调用 ✅；db 自动迁移 session_v2=778 ✅ |
+| ⑥ subagent 分化 | 定义层五角色全解析（checker→deepseek/deepseek-flash#max 成本分化保住）；运行时 task 派发 explorer+checker 双链路实证 ✅ |
+
+**迁移中发现的 V2 坑（四项，均已处置）**：
+1. **V1 json `agent` 段的 model 配置被 V2 屏蔽**（md 文件是权威，md 无 model → 空）→ model/variant 写进部署版五件 md frontmatter；title 定制与内置禁用（explore/plan/build）转 `agents` 原生键（disable→disabled）
+2. **`temperature` frontmatter 字段 V2 不认 → 整条 model 解析失败**（checker ∅ 根因）→ 删除（0.1 低温定制暂失，V2 request.body 形态可补回——遗留小项）
+3. **共享服务缓存 agent 定义**：改 md 后必须杀服务冷启动才重载（调试期多次 ∅ 假象皆此）——`kill $(pgrep -f "[o]pencode serve")`
+4. **db .backup 超时中断产生不完整备份**（quick_check ok 但缺表）——备份校验必须查行数非 quick_check；正确姿势=tmux 后台跑+行数比对
+
+**遗留观察项**：checker temperature 补回（request.body）；title 生成器中文前缀 prompt 在 V2 的生效性（agents.title 段归一化待观察）；TUI 交互首用体验；OpenCodeQuota 适配（用户挂账）。
