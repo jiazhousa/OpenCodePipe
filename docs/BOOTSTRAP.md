@@ -9,9 +9,10 @@
 ```bash
 # ① 挂载插件（按宿主版本二选一或并存，双形状入口同文件通吃）：
 #    V1（1.18.x，需 ≥1.18.29）：opencode.json 的 plugin 数组 → "file:///<B仓本地路径>"（目录形态）
-#    V2（2.x，2.0.10 实证配置式不生效、唯一可靠路径为约定目录）：
-#      mkdir -p <使用项目>/.opencode/plugins
-#      ln -s <B仓>/src/plugin/index.ts <使用项目>/.opencode/plugins/ocp-stage.ts
+#    V2（2.x）：全局约定目录一条命令（per-location 实例化，目录锚自动正确；2.0.10 实证配置式键不生效）：
+#      mkdir -p ~/.config/opencode/plugins
+#      ln -s <B仓>/src/plugin/index.ts ~/.config/opencode/plugins/ocp-stage.ts
+#      （项目级 .opencode/plugins/ 亦可，仅该项目生效）
 # ② 接入五角色：复制本仓 agents/ 五件至 ~/.config/opencode/agents/ 并填环境值
 #    ——完整步骤与 example 见 docs/agents-adoption.md（零模型配置即可跑，checker 建议跨家族）
 # ②b 复制 checker 规则库：cp -r <B仓>/configs/review-rules ~/.config/opencode/review-rules

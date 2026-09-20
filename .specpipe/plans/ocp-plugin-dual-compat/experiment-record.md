@@ -54,3 +54,20 @@ V2 获取：npm 平台包（`curl opencode.ai/update/api/latest/cli/npm` → 2.0
 - V2 分发渠道：npm `@opencode/cli-*` 平台包 / installer `https://opencode.ai/v2/install`（支持 `--version`）；与 V1 同 `opencode` 命令不并存
 - V2 SDK：`@opencode/plugin@2.0.10` 已发 npm（latest）——本仓仅 devDep 引类型，运行时不 import
 - V2 服务模型：共享后台服务 + `--standalone` 私有服务；`opencode debug paths` 查路径；日志在 `{data}/opencode/log/opencode.log`
+
+## 追加实验（2026-09-20 下午）：V2 全局挂载路径——痛点解除
+
+背景：用户提出升级动机（多 session 共享 server 省内存，多会话并发场景刚需），全局挂载失效为最大障碍。
+
+| 路径 | 结果 |
+|---|---|
+| P1 `~/.config/opencode/plugins/`（全局配置目录下约定目录） | ✅ **被 V2 认**（setup 执行，真 V2 ctx）——配置式挂载的替代品，V2 未删除全局能力而是换了位置 |
+| P3 共享 server 多项目 | ✅ **per-location 插件实例**：项目 B/C 连同一共享 server，各自获得 `ctx.location.directory=自己项目根` 的实例——stage 工具目录锚与 V1 `context.directory` 语义完全对齐，多项目/多 workspace 互不串扰 |
+
+**生产迁移方案（一条命令全局恢复）**：
+```bash
+mkdir -p ~/.config/opencode/plugins
+ln -s <B仓>/src/plugin/index.ts ~/.config/opencode/plugins/ocp-stage.ts
+```
+
+**升级评估更新**：stage 全局挂载障碍 ✅ 解除（且 per-location 语义优于 V1）；剩余预检项=provider（zhipuai CodingPlan）V2 路由实证 + agents 五件 V2 识别实证 + V1 会话历史不迁移（备份 `~/.opencode/bin/opencode` 可回退）+ LSP 缺失（fence 兜底，影响有限）。
