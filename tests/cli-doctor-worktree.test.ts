@@ -150,6 +150,7 @@ describe("checkPlugin", () => {
       expect(resultDir.message).toContain("V2约定目录");
     } finally {
       await rm(projectRoot, { recursive: true, force: true });
+      await rm(fakeRepo, { recursive: true, force: true });
     }
   });
 

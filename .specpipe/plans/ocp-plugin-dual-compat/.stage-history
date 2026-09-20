@@ -1,3 +1,7 @@
 {"ts": "2026-09-20T14:51:14+08:00", "topic": "ocp-plugin-dual-compat", "from": null, "to": "ISSUE_IMPL_DRAFT", "actor": "调度者", "trigger": "建档（OpenCode V2 发布，插件双版本兼容改造）"}
 {"ts": "2026-09-20T14:51:14+08:00", "topic": "ocp-plugin-dual-compat", "from": "ISSUE_IMPL_DRAFT", "to": "ISSUE_IMPL_REVIEWING", "actor": "调度者", "trigger": "编码完成（双形状入口+doctor 双轨+smoke 双链路+文档），fence 四步全绿，实机 1.18.31+2.0.10 双版本验证通过"}
 {"ts": "2026-09-20T14:55:54+08:00", "topic": "ocp-plugin-dual-compat", "from": "ISSUE_IMPL_REVIEWING", "to": "ISSUE_IMPL_DRAFT", "actor": "审查者", "trigger": "Issue Impl审查REJECT（doctor V2 约定目录判定大小写假阴性 + AGENTS.md 未同步，报告 ocp-plugin-dual-compat-impl-revision-1.md）"}
+{"ts": "2026-09-20T15:00:53+08:00", "topic": "ocp-plugin-dual-compat", "from": "ISSUE_IMPL_DRAFT", "to": "ISSUE_IMPL_REVIEWING", "actor": "调度者", "trigger": "复审派发（修复 commit aa64eeb：doctor 判定大小写不敏感+两分支口径统一、AGENTS.md 双形状同步、测试四形态）——补录：派发时 .stage 未先行推进，审查者落盘时按转移语义补记"}
+{"ts": "2026-09-20T15:00:53+08:00", "topic": "ocp-plugin-dual-compat", "from": "ISSUE_IMPL_REVIEWING", "to": "ISSUE_IMPL_APPROVED", "actor": "审查者", "trigger": "Issue Impl复审PASS（rev2：rev1 四项全闭环+134 用例 fence 四步全绿，报告 ocp-plugin-dual-compat-impl-revision-2.md）"}
+{"ts": "2026-09-20T15:02:31+08:00", "topic": "ocp-plugin-dual-compat", "from": "ISSUE_IMPL_APPROVED", "to": "WORKING", "actor": "调度者", "trigger": "复审 PASS 98/100，残留 low（测试临时目录清理）已修"}
+{"ts": "2026-09-20T15:02:31+08:00", "topic": "ocp-plugin-dual-compat", "from": "WORKING", "to": "QUALITY_GATE", "actor": "调度者", "trigger": "编码完成，fence 全绿，递交质量门"}
