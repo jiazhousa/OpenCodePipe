@@ -13,15 +13,16 @@
 import { tool, type Plugin } from "@opencode-ai/plugin";
 import { z } from "zod";
 import { STAGE_ACTORS, StageOpError, getStage, setStage } from "./stage-ops";
+import { initialStateNames } from "../core/table";
 
 /** 工作流根默认值（D8）；V1 插件配置元组第二参 / V2 ctx.options 的 { wfRoot } 可覆盖 */
 const DEFAULT_WF_ROOT = ".specpipe";
 
 /** 工具描述文本（V1/V2 两注册薄层同源，防双份漂移） */
 const STAGE_GET_DESC =
-  "查询 SpecPipe 工作流主题当前所处阶段（读 {wf}/plans/{topic}/.stage）。topic 为主题名（kebab-case，如 bd-score-panel）；未建档或不存在时返回错误说明。";
+  "查询 SpecPipe 工作流主题当前所处阶段（读 {wf}/plans/{topic}/.stage）。topic 为主题名（kebab-case，如 bd-score-panel）；未建档或不存在时返回错误说明；内容不在状态常量表时报非法状态（直写产物识别）。";
 const STAGE_SET_DESC =
-  "推进 SpecPipe 工作流主题状态（按转移表校验 from→to 单步合法性）。非法转移零写入并返回错误与当前状态合法后继清单；合法则写 .stage 并追加 .stage-history 流水。actor 取值：调度者 / 审查者。";
+  `推进 SpecPipe 工作流主题状态（按转移表校验 from→to 单步合法性）。未建档（无 .stage）时即为建档操作：to 限三初始态 ${initialStateNames().join(" / ")}，禁止 shell 直写 .stage。非法转移零写入并返回错误与当前状态合法后继清单；合法则写 .stage 并追加 .stage-history 流水。actor 取值：调度者 / 审查者。`;
 
 /** 工具错误转 LLM 可读文本：转移非法时附当前状态合法后继清单（D7「零写入返回错误」的出口形态） */
 function errorOutput(error: unknown): string {

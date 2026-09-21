@@ -49,6 +49,19 @@ for (const transition of transitionTable.transitions) {
   targets.add(transition.to);
 }
 
+/** 全部状态名集合——.stage 内容合法性校验用（识别绕过 stage_set 的直写产物，如阶段编号 I-S3 误作状态名） */
+const stateNames = new Set(transitionTable.states.map((state) => state.name));
+
+/** 校验状态名是否在常量表内（不区分路径；建档/推进/查询共用同一事实源，禁止消费方硬编码） */
+export function isKnownState(name: string): boolean {
+  return stateNames.has(name);
+}
+
+/** 三初始态清单（建档边 from=null 的唯一合法目标）——错误提示与工具描述共用 */
+export function initialStateNames(): string[] {
+  return transitionTable.states.filter((state) => state.initial === true).map((state) => state.name);
+}
+
 /** 查询合法后继清单（去重：同目标多边只列一次，如 ISSUE_IMPL_REVIEWING 的 REJECT 与 OVERTURN 双边） */
 export function getLegalSuccessors(state: string | null): string[] {
   const targets = successorIndex.get(state);

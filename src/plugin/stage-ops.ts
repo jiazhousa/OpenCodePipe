@@ -1,14 +1,14 @@
 // stage 工具核心实现——读写 {wf}/plans/{topic}/.stage 与 .stage-history（A 仓 07 卷「状态文件」契约）。
 // 与入口解耦：宿主 loader 约束下入口仅导出插件函数（D1），本模块由插件入口与测试直引，不经入口 re-export。
 import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
-import { getLegalSuccessors, isLegalTransition } from "../core/table";
+import { getLegalSuccessors, initialStateNames, isKnownState, isLegalTransition } from "../core/table";
 import { isValidTopic, resolveStagePaths } from "../core/paths";
 
 /** actor 取值（07 卷「状态更新职责分工」：调度者/审查者）——插件 zod schema 与本模块共用同一事实源 */
 export const STAGE_ACTORS = ["调度者", "审查者"] as const;
 export type StageActor = (typeof STAGE_ACTORS)[number];
 
-export type StageOpErrorCode = "TOPIC_INVALID" | "STAGE_NOT_FOUND" | "TRANSITION_ILLEGAL";
+export type StageOpErrorCode = "TOPIC_INVALID" | "STAGE_NOT_FOUND" | "STAGE_INVALID" | "TRANSITION_ILLEGAL";
 
 /** 结构化操作错误：code 供调用方分支；legalSuccessors（去重）为转移非法时的合法后继清单 */
 export class StageOpError extends Error {
@@ -76,6 +76,13 @@ export async function getStage(directory: string, wfRoot: string, topic: string)
   if (!stage) {
     throw new StageOpError("STAGE_NOT_FOUND", `topic「${topic}」的 .stage 为空文件（视为未建档）`);
   }
+  // 状态名合法性校验：识别绕过 stage_set 的直写产物（如阶段编号 I-S3 误作状态常量落盘）
+  if (!isKnownState(stage)) {
+    throw new StageOpError(
+      "STAGE_INVALID",
+      `topic「${topic}」的 .stage 内容不是合法状态名：${stage}（不在状态常量表，疑似绕过 stage_set 直写）——请修正为合法常量（见 07-state-machine 转移表）或清理该文件后经 stage_set 建档`,
+    );
+  }
   return { topic, stage };
 }
 
@@ -104,6 +111,23 @@ export async function setStage(
       throw error;
     }
     // 无 .stage 文件：视为未建档（from=null），建档边校验限定 initial 三态
+  }
+  // 状态名合法性前置校验（先于转移校验，零写入语义不变）：直写产物与笔误目标均在此识别，
+  // 报错语义区分于 TRANSITION_ILLEGAL（状态名非法 ≠ 转移非法），防误导排障方向
+  if (from !== null && !isKnownState(from)) {
+    throw new StageOpError(
+      "STAGE_INVALID",
+      `当前状态名非法：${from}（不在状态常量表，疑似绕过 stage_set 直写）——请修正 .stage 为合法常量（见 07-state-machine 转移表）或清理该文件后经 stage_set 建档（建档目标：${initialStateNames().join("、")}）`,
+    );
+  }
+  if (!isKnownState(to)) {
+    // from 终态（DONE/ALL_DONE）时无后继，尾段非空才拼接防空悬
+    const successors = getLegalSuccessors(from);
+    const successorHint = successors.length > 0 ? `；当前合法后继：${successors.join("、")}` : "";
+    throw new StageOpError(
+      "STAGE_INVALID",
+      `目标状态名非法：${to}（不在状态常量表）——未建档时合法建档目标：${initialStateNames().join("、")}${successorHint}`,
+    );
   }
   if (!isLegalTransition(from, to)) {
     throw new StageOpError(

@@ -55,6 +55,7 @@ color: "#FF8C00"
 | `edit` / `write` | 写 spec/impl 文档、AGENTS.md、归档 |
 | `bash` | worktree/commit 管理、收尾统一验证（全量单测/E2E/fence）、tmux |
 | `question` | 阻塞点向用户提问 |
+| `stage_get` / `stage_set` | 工作流状态机读写（插件注入）。`stage_set` **含建档**：topic 未建档（无 .stage）时 to 限三初始态 `EPIC_SPEC_DRAFT` / `SPEC_DRAFT` / `ISSUE_IMPL_DRAFT` |
 
 ## 图片解析路由（Looker，可选）
 
@@ -81,3 +82,4 @@ color: "#FF8C00"
 4. **并行需文件集不相交** — 切分任务块时保证；冲突仲裁是你的职责
 5. **用户放行点不自动推进** — SPEC_USER_AUDIT / EPIC_SPEC_USER_AUDIT 等状态必须等用户明确回复
 6. **收尾统一验证** — Builder 只跑最小验证；全量测试/E2E/fence 由你在 Story 收尾统一执行
+7. **`.stage` 写入一律经 `stage_set`** — 含建档（未建档时 to 限三初始态）；禁止 shell 直写 `.stage`（Issue 升级清理 `.stage` 属删除文件，不受限）

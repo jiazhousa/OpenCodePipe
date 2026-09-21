@@ -2,7 +2,7 @@
 // 不触碰真实 .specpipe/（D11）。直引 src/plugin/stage-ops：入口仅导出插件函数（D1 loader 约束），
 // 工具函数不从入口 re-export。
 import { describe, expect, test, beforeEach, afterEach } from "bun:test";
-import { mkdtemp, readFile, readdir, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { StageOpError, getStage, setStage } from "../src/plugin/stage-ops";
@@ -168,5 +168,69 @@ describe("topic 输入加固（kebab-case，防路径逃逸）", () => {
     }
     // 临时目录下未创建任何 .specpipe 结构（../escape 形态未逃逸、未铺 plans 目录）
     expect(await readdir(base)).toEqual([]);
+  });
+});
+
+describe("状态名合法性校验（STAGE_INVALID：直写产物识别，SI-001）", () => {
+  /** 预置 .stage 文件（模拟绕过 stage_set 的 shell 直写） */
+  async function directWriteStage(topic: string, content: string): Promise<void> {
+    const plansDir = join(base, WF_ROOT, "plans", topic);
+    await mkdir(plansDir, { recursive: true });
+    await writeFile(join(plansDir, ".stage"), `${content}\n`, "utf8");
+  }
+
+  test("get 读到直写非法状态名 I-S3：报 STAGE_INVALID，message 含实际值与直写提示", async () => {
+    await directWriteStage("si-001-topic", "I-S3");
+    const error = await captureStageError(() => getStage(base, WF_ROOT, "si-001-topic"));
+    expect(error).toBeInstanceOf(StageOpError);
+    expect(error?.code).toBe("STAGE_INVALID");
+    expect(error?.message).toContain("I-S3");
+    expect(error?.message).toContain("直写");
+    expect(error?.legalSuccessors).toBeUndefined();
+  });
+
+  test("空 .stage 文件边界回归：仍报 STAGE_NOT_FOUND（不误判为非法状态名）", async () => {
+    await directWriteStage("empty-topic", "");
+    const error = await captureStageError(() => getStage(base, WF_ROOT, "empty-topic"));
+    expect(error).toBeInstanceOf(StageOpError);
+    expect(error?.code).toBe("STAGE_NOT_FOUND");
+  });
+
+  test("set 遇非法 from（直写产物 I-S3）：报 STAGE_INVALID 附建档目标；.stage 原样、history 未创建（零写入）", async () => {
+    await directWriteStage("si-001-set", "I-S3");
+    const stageBefore = await readFile(join(base, WF_ROOT, "plans", "si-001-set", ".stage"), "utf8");
+    const error = await captureStageError(() => setStage(base, WF_ROOT, "si-001-set", "ISSUE_IMPL_REVIEWING", "调度者"));
+    expect(error).toBeInstanceOf(StageOpError);
+    expect(error?.code).toBe("STAGE_INVALID");
+    expect(error?.message).toContain("I-S3");
+    expect(error?.message).toContain("ISSUE_IMPL_DRAFT");
+    expect(await readFile(join(base, WF_ROOT, "plans", "si-001-set", ".stage"), "utf8")).toBe(stageBefore);
+    await expectMissing(join(base, WF_ROOT, "plans", "si-001-set", ".stage-history"));
+  });
+
+  test("set 非法 to（from=null 路径）：报 STAGE_INVALID 附三初始态；.stage 与 .stage-history 均未创建（零写入）", async () => {
+    const error = await captureStageError(() => setStage(base, WF_ROOT, "bad-to-init", "I-S4", "调度者"));
+    expect(error).toBeInstanceOf(StageOpError);
+    expect(error?.code).toBe("STAGE_INVALID");
+    expect(error?.message).toContain("I-S4");
+    for (const initial of ["EPIC_SPEC_DRAFT", "SPEC_DRAFT", "ISSUE_IMPL_DRAFT"]) {
+      expect(error?.message).toContain(initial);
+    }
+    await expectMissing(join(base, WF_ROOT, "plans", "bad-to-init", ".stage"));
+    await expectMissing(join(base, WF_ROOT, "plans", "bad-to-init", ".stage-history"));
+  });
+
+  test("set 非法 to（from=合法态路径）：报 STAGE_INVALID 附当前合法后继；.stage 与 .stage-history 逐字节未变更", async () => {
+    await setStage(base, WF_ROOT, "bad-to-work", "SPEC_DRAFT", "调度者");
+    const stageBefore = await readFile(join(base, WF_ROOT, "plans", "bad-to-work", ".stage"), "utf8");
+    const historyBefore = await readFile(join(base, WF_ROOT, "plans", "bad-to-work", ".stage-history"), "utf8");
+    const error = await captureStageError(() => setStage(base, WF_ROOT, "bad-to-work", "S-S6", "调度者"));
+    expect(error).toBeInstanceOf(StageOpError);
+    expect(error?.code).toBe("STAGE_INVALID");
+    expect(error?.message).toContain("S-S6");
+    // SPEC_DRAFT 唯一合法后继 SPEC_REVIEWING（提示词给出，区别于 legalSuccessors 字段）
+    expect(error?.message).toContain("SPEC_REVIEWING");
+    expect(await readFile(join(base, WF_ROOT, "plans", "bad-to-work", ".stage"), "utf8")).toBe(stageBefore);
+    expect(await readFile(join(base, WF_ROOT, "plans", "bad-to-work", ".stage-history"), "utf8")).toBe(historyBefore);
   });
 });
