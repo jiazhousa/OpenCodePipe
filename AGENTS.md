@@ -39,8 +39,13 @@
 - **自举趣事**：line-budget 对本 Story 自己的 spec 审查报告执法（43 行 > 30 上限）——压缩至 27 行（点位清单复述改引用 spec）
 - **档案分居模式**：会话 cwd≠B 仓根时插件 wfRoot 锚 cwd（.stage 在 doc 工作区）——DONE 后归档 B 仓闭环（pre-push 校验 B 仓 repoRoot 下档案）
 
-### Issue ocp-plugin-dual-compat —— OpenCode V2 插件兼容（2026-09-20 DONE，质量门 98/100）
+### Issue stage-file-guard —— stage 状态名合法性校验补强（2026-09-21 DONE，质量门 96/100）
 
+- **背景**：~/doc/SpecIssue.md SI-001——`.stage` 被 shell 直写非法状态名 `I-S3`（阶段编号误作状态常量）致推进被拒；调查证实建档边本就内建（转移表 3 条 `from: null`）但工具描述未披露，且查询通道对直写产物零设防、报错笼统归为「非法转移」误导排障
+- **改动**（commit `d1b2389`）：`table.ts` 新增 `isKnownState`/`initialStateNames`；`stage-ops.ts` 新增 `STAGE_INVALID` 错误码（get 识别直写产物 / set 前置校验非法 from·to，message 附实际值与修复指引，清单内嵌不占 legalSuccessors 防「合法后继」措辞错位）；`index.ts` SET 描述消费 `initialStateNames()` 显性化建档语义（单源）；oracle.md（B 仓源+部署位）工具表新增 stage 行、铁律新增「`.stage` 一律经 stage_set」第 7 条
+- **教训**：errorOutput 的 legalSuccessors 固定措辞是「当前状态合法后继」——错误提示若传异构清单（建档目标等）须内嵌 message 而非复用该字段；质量门 2 low（描述字面量双源/终态后继空悬）已 amend 修复；fence 四步全绿（commit `d1b2389` 终态）
+
+### Issue ocp-plugin-dual-compat —— OpenCode V2 插件兼容（2026-09-20 DONE，质量门 98/100）
 - **背景**：OpenCode V2 发布（2.0.10 beta，npm `@opencode/cli-*` 渠道），插件 API 全面重写（官方 breaking：V1 实现不在 V2 运行）；用户要求双兼容 1.18.x+2.x（不可则优先 2.x）——实证后双兼容成立
 - **插件双形状**：`src/plugin/index.ts` default export `{id, setup, server}`（V1 调 server()/V2 调 setup()，手写形状零运行时依赖 `@opencode/plugin`——1.18 宿主无此包；**禁止 named 运行时导出**约束延续）；setup 形态防御（1.18.31 误调传非 V2 ctx 静默跳过）；stage-ops 核心零改动；V2 目录锚 `ctx.location.directory`（多 workspace 待正式版复核）
 - **V2 挂载实证**（完整矩阵见 plans/ocp-plugin-dual-compat/experiment-record.md）：**配置式 plugin/plugins 键 2.0.10 全不生效（beta 缺陷），唯一可靠 = `.opencode/plugins/` 约定目录**（symlink 单文件/目录/转发壳均可）；陷阱：`opencode plugin list` 不触发加载不可作判据；V2 共享后台服务持有启动时配置（改配置须杀服务或 `--standalone`）
