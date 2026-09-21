@@ -128,3 +128,10 @@ ln -s <B仓>/src/plugin/index.ts ~/.config/opencode/plugins/ocp-stage.ts
 
 ### 盯梢触发条件
 V2 升级后跑 setup ctx 探针（`{id, setup}` 形态 + dump ctx keys，模板见 09-20 记录）：ctx 一旦出现 slots/ui/theme 域 → 启动适配（改 tui.tsx 挂 sidebar_content slot，预计小时级）。注意 v0.0.2 的 tui.tsx 用的是 1.4.8 类型包字段（value/onSelect），V1 运行时规格是 name/title/run/slashName——若接线后协议另有字段名，以运行时探针为准
+
+## 2026-09-21 补：title 生成器定制在 V2 恢复（遗留观察项闭环）
+- 现象：V2 后 session 标题全裸（无 Fix-/Feature- 前缀）——`agents.title` json 段 V2 不解析（debug agents 空实证）
+- 恢复：定制转 `~/.config/opencode/agents/title.md`（frontmatter `model: zhipuai-coding-plan/glm-5.3-flash`，六前缀 prompt 写 body；**不写 temperature**——V2 不认会炸整条 model 解析）
+- 生效验证：`opencode reload` 优雅重载（**无需杀共享服务**——杀服务会断自己的会话，工具执行一起被带断，title.md 写入都丢了）；API /api/agent 见 title 条目 model=glm-5.3-flash；实测 run 一轮对话标题 `Fix-工单列表导出Excel乱码排查`（前缀+中文+flash 全对）
+- V2 内置特殊 agent 体系：title/compaction/summary（compaction/summary model=None 继承默认，可同法 md 覆盖）
+- json 死配置已删（备份 opencode.json.bak-20260921-title）
