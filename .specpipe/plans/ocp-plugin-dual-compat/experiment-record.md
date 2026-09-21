@@ -109,3 +109,22 @@ ln -s <B仓>/src/plugin/index.ts ~/.config/opencode/plugins/ocp-stage.ts
 4. **db .backup 超时中断产生不完整备份**（quick_check ok 但缺表）——备份校验必须查行数非 quick_check；正确姿势=tmux 后台跑+行数比对
 
 **遗留观察项**：checker temperature 补回（request.body）；title 生成器中文前缀 prompt 在 V2 的生效性（agents.title 段归一化待观察）；TUI 交互首用体验；OpenCodeQuota 适配（用户挂账）。
+
+---
+
+## 2026-09-21 web 调研补录：官方双线格局 + 留 V2 决策
+
+### 官方格局（实查 GitHub anomalyco/opencode + opencode.ai）
+- **V1 主线（1.18.x）**：官方 changelog 主推，最新 1.18.31（09-14）。TUI 插件系统完整——`packages/opencode/specs/tui-plugins.md`（dev 分支，544 行）：协议 `{id?, tui}` + `tui.json` 配置，slots 体系齐全（sidebar_content/title/footer、home_prompt_right、session_prompt_right 等 14 个宿主 slot），keymap/route/ui/theme/toast 全域
+- **V2 重写线（2.0.x beta）**：无 release 条目仅 tag，最新 2.0.11（09-20，即本机版本）。迭代节奏每天 1-2 版（2.0.9→10→11 在 09-19~20 两天连发）。协议统一 `{id, setup}`（$At 谓词：id 非空 string + setup function），setup ctx 25 域全 server 语义，**UI 域未接线**但 slots/markdown 注册基础设施在 binary 内完整保留
+- `2.0` 分支是 4 月停掉的 exploration 残骸（version 1.4.3），V2 真身在 tag v2.0.x
+- 官方做 V1/V2 混合兼容（v1.18.12/19/24 changelog 三处证据）
+- V2 的 cli.json = CLI/TUI 侧插件通道（文档明示），opencode.json plugins = server 侧
+
+### 决策（用户拍板）
+- **留 V2（2.0.11）等 UI 域接线**，不回 V1 双 binary 并存
+- 过渡方案：`~/bin/quota`（GLM 5h/周窗 + DeepSeek 余额，凭证自动读 V2 config）
+- OpenCodeQuota v0.0.2 挂 GitHub（README 已注明协议过渡版），业务层（凭证链/额度拉取）已对 2.0.11 实证
+
+### 盯梢触发条件
+V2 升级后跑 setup ctx 探针（`{id, setup}` 形态 + dump ctx keys，模板见 09-20 记录）：ctx 一旦出现 slots/ui/theme 域 → 启动适配（改 tui.tsx 挂 sidebar_content slot，预计小时级）。注意 v0.0.2 的 tui.tsx 用的是 1.4.8 类型包字段（value/onSelect），V1 运行时规格是 name/title/run/slashName——若接线后协议另有字段名，以运行时探针为准
