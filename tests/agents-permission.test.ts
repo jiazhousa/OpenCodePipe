@@ -3,6 +3,10 @@
 // 断言权限白名单结构与迁移适配点（模型占位、示例值声明、对口 08-roles.md 声明、QUALITY_GATE→DONE 分工加注）。
 // 注意：白名单中的检索命令/绝对路径条目为示例值（文件头声明用户决策位），
 // 按环境增删后需同步本测试的期望（改定义必须过测试，防止权限结构意外漂移）。
+// 2026-09-23 V2 权限引擎适配：① edit 兜底 deny 用 "**" 而非裸 "*"（裸 * 触发 visibleTools 整组隐藏
+// edit/write/apply_patch）；② checker 不配 write/apply_patch 键（三键归一 findLast，末尾键兜底压制
+// edit 块 allow）；③ edit 白名单用相对 session 目录路径（V2 运行时 resource 为相对路径）；④ bash
+// 白名单扩只读 git 子命令与小工具 + git --output 写洞后置 deny（详见 checker-permission-fix-review-20260922-1932）。
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -143,10 +147,11 @@ describe("agents 五角色定义（v1 迁移资产）", () => {
     for (const probe of ["ws", "exa", "tvly", "ctx7"]) {
       expect(allowed.some((c) => c === probe || c.startsWith(probe + " "))).toBe(true);
     }
-    // 无写类/git 变更类命令
+    // 无写类/git 变更类命令（git 只读子命令豁免集含 branch/worktree/remote/rev-parse/ls-files 的只读形态——
+    // branch 仅精确 list 形态被 allow，写变体 -D/-m 等不在白名单）
     const forbiddenPatterns: RegExp[] = [
-      // git 只读子命令（status/log/show/diff）之外的一切 git 操作
-      /^git\s+(?!status\b|log\b|show\b|diff\b)/,
+      // git 只读子命令之外的一切 git 操作
+      /^git\s+(?!status\b|log\b|show\b|diff\b|branch\b|worktree\b|remote\b|rev-parse\b|ls-files\b)/,
       // 写类文件操作 / 权限变更
       /\b(rm|mv|cp|mkdir|touch|tee|truncate|chmod|chown)\b/,
       // git 变更类子命令
@@ -161,16 +166,22 @@ describe("agents 五角色定义（v1 迁移资产）", () => {
         expect(re.test(cmd)).toBe(false);
       }
     }
+    // git --output 写洞后置 deny（git show/diff/log 的 --output 可写文件）
+    expect(bash["git show *--output*"]).toBe("deny");
+    expect(bash["git diff *--output*"]).toBe("deny");
+    expect(bash["git log *--output*"]).toBe("deny");
   });
 
-  test("checker：edit 白名单限 .specpipe/reviews 与 .specpipe/plans，bash 编译测试命令在位且兜底 deny", () => {
+  test("checker：edit 白名单限 .specpipe/reviews 与 .specpipe/plans（V2 形态：** 兜底 + 相对模式 + 无 write/apply_patch 键），bash 编译测试命令在位且兜底 deny", () => {
     const perm = permissionOf("checker.md");
     const edit = mapOf(perm, "edit");
-    expect(edit["*"]).toBe("deny");
+    // 兜底 deny 必须用 "**" 而非裸 "*"（裸 * 在 V2 visibleTools 下导致 edit/write/apply_patch 整组从工具面隐藏）
+    expect(edit["**"]).toBe("deny");
+    expect(edit["*"]).toBeUndefined();
     const editKeys = Object.keys(edit);
     expect(editKeys.some((k) => k.startsWith(".specpipe/reviews"))).toBe(true);
     expect(editKeys.some((k) => k.startsWith(".specpipe/plans"))).toBe(true);
-    // edit 段所有 allow 条目必须落在 reviews / plans 路径内（含绝对路径示例条目）
+    // edit 段所有 allow 条目必须落在 reviews / plans 路径内（相对 session 目录模式）
     for (const [k, v] of Object.entries(edit)) {
       if (v === "allow") {
         expect(/(\.specpipe\/reviews|\.specpipe\/plans)/.test(k)).toBe(true);
@@ -181,9 +192,14 @@ describe("agents 五角色定义（v1 迁移资产）", () => {
     for (const cmd of ["mvn *", "npm *", "npx *", "pytest *", "python *", "python3 *"]) {
       expect(bash[cmd]).toBe("allow");
     }
-    // write/apply_patch 硬禁（报告与 .stage 走 edit 白名单）
-    expect(perm.write).toBe("deny");
-    expect(perm.apply_patch).toBe("deny");
+    // write/apply_patch 键必须不存在（V2 三键归一 findLast，末尾键兜底 deny 会压制 edit 块 allow；
+    // 报告与 .stage 走 edit 白名单 + stage_set）
+    expect(perm.write).toBeUndefined();
+    expect(perm.apply_patch).toBeUndefined();
+    // git --output 写洞后置 deny
+    expect(bash["git show *--output*"]).toBe("deny");
+    expect(bash["git diff *--output*"]).toBe("deny");
+    expect(bash["git log *--output*"]).toBe("deny");
   });
 
   test("checker 正文含 QUALITY_GATE→DONE 调度者终检分工加注", () => {

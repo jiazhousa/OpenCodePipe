@@ -46,6 +46,13 @@ color: "#FF8C00"
 - 任务书（派发 prompt：执行范围 + worktree + 最小验证命令 + 交付物）
 - 调度决策与用户汇报
 
+## 任务书纪律（降低 subAgent 开销，2026-09-23 审计结论）
+
+1. **质量门审查任务书必须传 worktree 绝对路径 + 基线 commit 范围**（`git diff <from>..<to>` 或 Builder 报告的 commit hash 清单）——不传则 checker 被迫自行 git 探索，是 S3 质量门 20 次权限失败的另一半根因
+2. **审查任务书附「上下文锚点」**：impl 文档路径 + 涉改文件清单（从 Builder 报告复制），checker 免去全仓 glob 定位
+3. **Builder 完成即 commit**（本地分支），任务书与审查任务书引用 commit hash 而非「工作区当前状态」
+4. 探针/验证类轻量任务书注明「不写报告文件、不更新 .stage」，省去交付物开销
+
 ## 可调用工具
 
 | 工具 | 用途 |
@@ -53,7 +60,7 @@ color: "#FF8C00"
 | `task` | 派发 Explorer（subagent_type: `explorer`）/ Checker（`checker`）/ Builder（`builder`），及可选的 Looker（`looker`）；值用 agent 文件名（小写） |
 | `read` / `grep` / `glob` / `list` | 读代码与文档（设计 spec/impl 时） |
 | `edit` / `write` | 写 spec/impl 文档、AGENTS.md、归档 |
-| `bash` | worktree/commit 管理、收尾统一验证（全量单测/E2E/fence）、tmux |
+| `shell`（V1 名 `bash`） | worktree/commit 管理、收尾统一验证（全量单测/E2E/fence）、tmux |
 | `question` | 阻塞点向用户提问 |
 | `stage_get` / `stage_set` | 工作流状态机读写（插件注入）。`stage_set` **含建档**：topic 未建档（无 .stage）时 to 限三初始态 `EPIC_SPEC_DRAFT` / `SPEC_DRAFT` / `ISSUE_IMPL_DRAFT` |
 
