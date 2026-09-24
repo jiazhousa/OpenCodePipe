@@ -22,7 +22,7 @@
 
 > 环境自检：`ocp doctor`（插件挂载——V1 配置式与 V2 约定目录双轨识别 / agents 五件 / 模型路由建议 / 检索通道 / vendored 一致性）。v1 skill 已退役（历史存档不含于本仓）。
 >
-> **OpenCode 版本兼容**（详见 `.specpipe/plans/ocp-plugin-dual-compat/`）：插件入口为双形状（V1 调 `server()` / V2 调 `setup()`），1.18.31 与 2.0.10 双版本实机验证通过。V2 安装：`curl -fsSL https://opencode.ai/v2/install | bash`（与 V1 同命令不并存，替换式升级）；V2 注意事项：共享后台服务持有启动时配置（改配置后重启服务或 `--standalone`）、`opencode plugin list` 不反映配置/约定目录插件加载状态（以 `ocp doctor` 为准）。
+> **OpenCode 版本兼容**（详见 `.specpipe/plans/ocp-plugin-dual-compat/`）：插件入口为双形状（V1 调 `server()` / V2 调 `setup()`），1.18.31、2.0.10 与 2.0.16 三版本实机验证通过（2.0.16 复证：配置式 plugins 键仍不生效，全局约定目录 symlink 生效，stage 工具实测可用）。V2 安装：`curl -fsSL https://opencode.ai/v2/install | bash`（与 V1 同命令不并存，替换式升级）；V2 注意事项：共享后台服务持有启动时配置（改配置后重启服务或 `--standalone`）、`opencode plugin list` 不反映配置/约定目录插件加载状态（以 `ocp doctor` 为准）。
 
 ## 2. 克隆本仓（工作流档案随仓走）
 

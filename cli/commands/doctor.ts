@@ -123,11 +123,12 @@ async function readPluginConfig(path: string): Promise<unknown> {
   return record.plugin ?? record.plugins;
 }
 
-/** V2 约定目录挂载判定：{项目根}/.opencode/plugins/ 下条目指向 B 仓插件即命中——2.x 唯一可靠发现路径（实验实证，见 plans/ocp-plugin-dual-compat）。
+/** V2 约定目录挂载判定（plugins 目录直接判）：条目指向 B 仓插件即命中——2.x 唯一可靠发现路径（实验实证，见 plans/ocp-plugin-dual-compat）。
+ *  项目形态 {项目根}/.opencode/plugins/，全局形态 {全局配置根}/plugins/（BOOTSTRAP 推荐，per-location 全局实例化）。
  *  判据（大小写不敏感，克隆目录名形态不限）：目标路径含 `opencodepipe` 且（含 `src/plugin`（单文件链接）或目标为目录（直链 B 仓根））；
  *  symlink 按 realpath 解析，断链按 readlink 目标字面判（无法 stat 目录形态，仅路径判）。 */
-function v2ConventionMounted(projectRoot: string): boolean {
-  const dir = join(projectRoot, ".opencode", "plugins");
+function v2PluginsDirMounted(pluginsDir: string): boolean {
+  const dir = pluginsDir;
   if (!existsSync(dir)) return false;
   try {
     const entries = readdirSync(dir);
@@ -161,7 +162,7 @@ function v2ConventionMounted(projectRoot: string): boolean {
   }
 }
 
-/** 插件挂载状态：V1 配置键（全局+项目 opencode.json）与 V2 约定目录（项目 .opencode/plugins/）任一命中即 PASS */
+/** 插件挂载状态：V1 配置键（全局+项目 opencode.json）与 V2 约定目录（项目 .opencode/plugins/ + 全局 <配置根>/plugins/）任一命中即 PASS */
 export async function checkPlugin(globalConfigPath: string, projectConfigPath: string): Promise<CheckResult> {
   const projectRoot = dirname(projectConfigPath);
   const sources: Array<{ scope: string; path: string }> = [
@@ -180,15 +181,18 @@ export async function checkPlugin(globalConfigPath: string, projectConfigPath: s
       errors.push(`${source.path} 解析失败：${error instanceof Error ? error.message : String(error)}`);
     }
   }
-  if (v2ConventionMounted(projectRoot)) {
+  if (v2PluginsDirMounted(join(projectRoot, ".opencode", "plugins"))) {
     mounted.push("项目·V2约定目录");
+  }
+  if (v2PluginsDirMounted(join(dirname(globalConfigPath), "plugins"))) {
+    mounted.push("全局·V2约定目录");
   }
   if (mounted.length > 0) {
     return { name: "opencode-plugin", level: "PASS", message: `已挂载（${mounted.join("+")}）` };
   }
   const detail = [
-    errors.length > 0 ? errors.join("；") : "全局与项目 opencode.json 均未引用 opencodepipe 插件，项目 .opencode/plugins/ 亦无 V2 约定目录挂载",
-    `V1（1.18.x）挂载："plugin": ["file:///<B仓>/src/plugin/index.ts"]；V2（2.x）挂载：ln -s <B仓>/src/plugin/index.ts <项目>/.opencode/plugins/ocp-stage.ts`,
+    errors.length > 0 ? errors.join("；") : "全局与项目 opencode.json 均未引用 opencodepipe 插件，全局/项目 V2 约定目录亦无挂载",
+    `V1（1.18.x）挂载："plugin": ["file:///<B仓>/src/plugin/index.ts"]；V2（2.x）挂载（全局，推荐）：ln -s <B仓>/src/plugin/index.ts ~/.config/opencode/plugins/ocp-stage.ts；或项目级：ln -s … <项目>/.opencode/plugins/ocp-stage.ts`,
   ];
   return { name: "opencode-plugin", level: "WARN", message: detail.join("；") };
 }
@@ -319,7 +323,8 @@ export async function checkModelRouting(
       try {
         if (!existsSync(path)) continue;
         const config = await readConfigObject(path);
-        const agentSection = config?.agent;
+        // V2 原生键 agents 优先，回退 V1 键 agent（V1/V2 同文件共存时 native V2 值优先，对齐官方语义）
+        const agentSection = config?.agents ?? config?.agent;
         if (agentSection && typeof agentSection === "object" && !Array.isArray(agentSection)) {
           const entry = (agentSection as Record<string, unknown>)[name];
           if (entry && typeof entry === "object") {
@@ -338,9 +343,11 @@ export async function checkModelRouting(
     return "<默认>";
   };
   const [oracleModel, checkerModel, builderModel] = await Promise.all([resolve("oracle"), resolve("checker"), resolve("builder")]);
+  // clash 比较剥离 V2 的 #variant 后缀：同模型不同档位仍是同模型（自审同盲区）
+  const base = (m: string): string => m.split("#")[0];
   const clashes: string[] = [];
-  if (checkerModel === oracleModel) clashes.push(`oracle=${oracleModel}`);
-  if (checkerModel === builderModel) clashes.push(`builder=${builderModel}`);
+  if (base(checkerModel) === base(oracleModel)) clashes.push(`oracle=${oracleModel}`);
+  if (base(checkerModel) === base(builderModel)) clashes.push(`builder=${builderModel}`);
   if (clashes.length > 0) {
     const sameDefault = checkerModel === "<默认>";
     return {
