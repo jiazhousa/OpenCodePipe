@@ -135,3 +135,40 @@ V2 升级后跑 setup ctx 探针（`{id, setup}` 形态 + dump ctx keys，模板
 - 生效验证：`opencode reload` 优雅重载（**无需杀共享服务**——杀服务会断自己的会话，工具执行一起被带断，title.md 写入都丢了）；API /api/agent 见 title 条目 model=glm-5.3-flash；实测 run 一轮对话标题 `Fix-工单列表导出Excel乱码排查`（前缀+中文+flash 全对）
 - V2 内置特殊 agent 体系：title/compaction/summary（compaction/summary model=None 继承默认，可同法 md 覆盖）
 - json 死配置已删（备份 opencode.json.bak-20260921-title）
+
+## 2026-09-25 补：V2 UI 域接线实证（2.0.16，盯梢条件闭环）
+
+09-21 盯梢条件在 2.0.16 命中——CLI/TUI 侧插件通道完整接线，quota TUI 适配启动条件成立。
+
+### 挂载形态（MARK 硬观测矩阵，TUI 侧）
+
+| 形态 | TUI 侧加载 |
+|---|---|
+| cli.json plugins file URL（run/TUI 双触发） | ❌ |
+| 约定目录裸单文件（plugins/x.ts） | 仅 server 侧 |
+| 约定目录 index.ts（plugins/x/index.ts） | 仅 server 侧 |
+| **完整包结构 plugins/\<name\>/{package.json exports "./tui", tui.tsx}** | ✅ **TUI 侧加载**（index.ts 同时被 server 侧消费） |
+
+### CLI/TUI 侧 setup ctx（13 域）
+
+`app / attention / client / data / keymap / location / markdown / options / renderer / storage / theme / themeMode / ui`
+
+ui API 面：`dialog{show/set/clear/alert/confirm/prompt/select}`、`toast.show`、`format.path`、`router{register/navigate/current}`、`panel{open/close/current}`（仅 session 路由）、`tabs{enabled/list/open/focus/move/close}`、`slot(claim)`
+
+### ui.slot 用法（binary 源码逆向 + 实测）
+
+- claim 形态：`ui.slot({ <placement>: "<布局路径>", render })`——placement 五选一（prepend/append/before/after/replace），**恰好一个**
+- 布局路径清单（binary `path:"..."` 全集）：`sidebar.content`（quota 侧栏位）、`sidebar.footer`、`session.panel`、`session.composer.top`、`home.footer`、`home.footer.status`、`prompt.footer`、`prompt.footer.file`、`prompt.footer.status`
+- target 用裸名（如 "sidebar"）claim **不报错但布局零消费**（render 永不被调，静默）——必须用完整布局路径
+- **render 必须返回 OpenTUI 组件**：裸字符串进渲染管线触发 Orphan text error → **TUI 崩溃**（crash screen 自动生成 issue 链接）；`<text>` 实测上屏成功
+- JSX / @opentui/solid 由宿主内嵌 bun-plugin-solid 转换与解析（插件目录无需 node_modules）
+
+### 实证记录
+
+tmux PTY 起 TUI + capture-pane 截屏：`ui.slot({append:"sidebar.content", render:()=>(<text>PROBE-SIDEBAR-RENDER-OK</text>)})` 于会话视图右侧栏渲染成功（2026-09-24 16:42 UTC，2.0.16，零错误）。
+
+### quota 适配工作重估
+
+- UI 层：V1 Solid/OpenTUI 渲染代码（quota 仓 src/tui.tsx 水平条/卡片）同底座直接搬入 slot render——复用度高
+- 业务层：凭证链/额度拉取已对 2.0.11 实证（quota v0.0.2）
+- 实际工作量：挂载层改造（单文件 file URL → 完整包结构）+ host 探测适配（ctx 形态、存储路径、版本门放宽 2.x）
