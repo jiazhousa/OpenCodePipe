@@ -203,3 +203,13 @@ quota 双侧架构 shipped（commit bb938a5）+ smoke 修复闭环（fence build
 - V2 主题 token 实测：text.action.primary.base 在暗色主题为近白 RGB(238,238,238)（非主题色）；进度条主色取 agent 自定义色（oracle.md frontmatter color=#FF8C00，与 TUI 状态行渲染完全一致）；OpenTUI fg 接受 hex 字符串
 - smoke 的 mock 注入点随数据层迁 server 侧（tests/smoke/server-entry.ts → createQuotaServerPlugin({fetch})），tui 侧纯转发生产渲染（零 mock）
 - Backlog：GPT OAuth 合成注入（V2 `ctx.integration.connect` 的 oauth 形态未验证，V1 smoke 曾注入合成 OAuth）；quota 手动 refresh 命令（keymap.layer 需在 render 组件内注册）
+
+### 2026-09-25 追记：CLI 插件 keymap 命令注册正解（quota /quota-refresh 落地实证）
+
+- **ctx.keymap 域**（CLI 插件）：`{layer, dispatch, shortcuts, commands, pending, active, mode}`——layer 是 `createLayer`（OpenTUI 工厂，**无** registerLayer/registerCommand）
+- **注册铁律：`ctx.keymap.layer(factory)` 必须在 `app` slot 的 render 内调用**——`sidebar.content` slot 渲染树**没有 KeymapProvider 上下文**（直接 useBindings 抛 "Keymap not found. Wrap the tree in <KeymapProvider>"；layer() 静默不注册，commands() 查无）。官方 pattern：`ctx.ui.slot({append:"app", render(){ keymap.layer(...); return null }})`
+- **layer 工厂形态**：`() => ({ mode:"global", commands:[...] })`——传对象而非工厂函数同样静默失效；mode 缺省则命令不可达（palette 查 visibility:"reachable"）
+- **命令字段**：`{ id, title, group, palette:true, slash:{name, aliases?, arguments?}, bind?, run }`——slash 是**对象**（V1 的 namespace:"palette"/slashName 字符串形态已废）；palette 过滤 `namespace:"palette"` + `hidden!==true`（源码 useCommandSlashes/`isVisiblePaletteCommand`）
+- **注册时序**：layer 调用后命令非立即可查（reactive flush）——~500ms 后 `ctx.keymap.commands()` 在册；app slot render 会被宿主高频重渲染（探针实测每秒数百次），layer 重复注册幂等（命令不叠加），但**勿在 render 里放大开销**（日志写盘级别也不行）
+- 宿主内嵌模块仅 `@opentui/core`/`@opentui/solid`——插件 import `@opentui/keymap/solid` 需自带 node_modules，且**副本模块的 Provider 上下文与宿主实例不通**（useBindings 必 miss）——插件只能走 ctx.keymap 通道
+- RPC 手动刷新链：CLI 命令 run → `rpc.call({rpcID, method:"refresh"})` → server 侧 handler await `controller.refresh()` 回传快照 → toast 反馈；**常驻 --service 的 server 侧插件不随挂载目录 touch 重载**——重启前命令报 "Refresh failed"（预期）
