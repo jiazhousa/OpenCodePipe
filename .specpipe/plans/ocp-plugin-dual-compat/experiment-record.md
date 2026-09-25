@@ -172,3 +172,34 @@ tmux PTY 起 TUI + capture-pane 截屏：`ui.slot({append:"sidebar.content", ren
 - UI 层：V1 Solid/OpenTUI 渲染代码（quota 仓 src/tui.tsx 水平条/卡片）同底座直接搬入 slot render——复用度高
 - 业务层：凭证链/额度拉取已对 2.0.11 实证（quota v0.0.2）
 - 实际工作量：挂载层改造（单文件 file URL → 完整包结构）+ host 探测适配（ctx 形态、存储路径、版本门放宽 2.x）
+
+## 2026-09-25 增补：quota V2 双侧架构交付 + smoke 收尾实证（fence 四步全绿）
+
+### 交付状态
+
+quota 双侧架构 shipped（commit bb938a5）+ smoke 修复闭环（fence build/unit-ui/smoke 全绿，smoke ~19s）。本轮新增实证如下，全部 2.0.16 隔离环境复刻验证（XDG 全隔离 + tmux PTY）。
+
+### config 激活与 provider 目录（纠正两组此前误判）
+
+- **config 激活正解：单数 `provider` 键 + `options.apiKey`**（官方文档正解）；smoke 初版用的复数 `providers` + `settings` **不激活**（/api/provider 不回显该渠道）。binary 同时收 provider/providers 两键，但激活判定只认 options 合并结果；API 返回时统一出现在 `settings` 键
+- **目录源换了**：V2 从 `https://models.opencode.ai` 拉取（V1 的 models.dev 域名与 `OPENCODE_MODELS_PATH` env 注入均死）；缓存写宿主 kv 存储（键 `models-dev:catalog`，SQLite kv 表）——冷隔离环境**无该缓存**，靠启动异步拉取
+- **`/api/provider` 只回激活集**（有凭据/config 声明的渠道），不是目录全集；目录 223 个时激活集仅 3-5 个
+- **两级异步时序**：目录拉取+注册 ~12s（6.8MB）；插件加载本身也异步（serve 启动 t+8s 查 /api/plugin 仍空，10-20s 才注册）——轮询等待是必须的，单次断言必挂
+- binary 内置目录快照（/$bunfs/root/snapshot-*.txt）存在但隔离实验未观察到其生效路径（cache/网络优先）
+
+### 进程与端口卫生（V2 独有坑）
+
+- **V2 TUI 单机模式 spawn 后台 service 绑默认端口 49374**；该端口被残留 service 占用时 TUI 永挂 "Starting background server…"（无超时）——**残留 service 是 TUI 卡死根因**（非隔离环境本身问题）
+- TUI 死后其 spawn 的 service 不随 tmux 退出，成孤儿持续占端口 → 自我污染循环；smoke finally 按「cwd 在隔离 root 下」识别回收全部 opencode 孤儿（多轮防 respawn 竞态）
+- 实验脚本教训：`(cd $T && opencode serve & echo $! > pid)` 的 kill 模式杀的是 subshell，serve 成孤儿——验证性实验必须按 /proc/PID/cwd 回收
+
+### quota 冷启动自愈（生产改进）
+
+- server 侧启动刷新可能跑在目录就绪前（凭据集不齐 → 全渠道 disconnected 零请求）；controller 增加 15s×4 自愈重试（任一渠道 ready 即停）——对真实新装用户首启同样受益
+
+### 其它
+
+- **CLI 侧插件热更新可用**（用户实证）：改 tui.tsx 后当前 TUI 会话实时重载，无需重启（此前"需重启"结论作废）
+- V2 主题 token 实测：text.action.primary.base 在暗色主题为近白 RGB(238,238,238)（非主题色）；进度条主色取 agent 自定义色（oracle.md frontmatter color=#FF8C00，与 TUI 状态行渲染完全一致）；OpenTUI fg 接受 hex 字符串
+- smoke 的 mock 注入点随数据层迁 server 侧（tests/smoke/server-entry.ts → createQuotaServerPlugin({fetch})），tui 侧纯转发生产渲染（零 mock）
+- Backlog：GPT OAuth 合成注入（V2 `ctx.integration.connect` 的 oauth 形态未验证，V1 smoke 曾注入合成 OAuth）；quota 手动 refresh 命令（keymap.layer 需在 render 组件内注册）
